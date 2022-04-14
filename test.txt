@@ -1,0 +1,7 @@
+
+rmdisk -path=/hola/gerson/ver/disk1.dk
+
+mKdisk -size=3 -fit= BF -unit=m -path= /hola/gerson/ver/disk1.dk
+
+
+fdisk -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition 
