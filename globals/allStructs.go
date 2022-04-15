@@ -11,6 +11,11 @@ type Command struct {
 	Name       string
 }
 
+type VoidSpace struct {
+	Start int
+	Size  int
+}
+
 type Partition struct {
 	Part_status [3]byte
 	Part_type   [4]byte
@@ -26,4 +31,13 @@ type MBR struct {
 	Mbr_dsk_signature  [16]byte
 	Dsk_fit            [4]byte
 	Partitions         [4]Partition
+}
+
+type EBR struct {
+	Part_status [3]byte
+	Part_fit    [4]byte
+	Part_start  [16]byte
+	Part_size   [16]byte
+	Part_next   [16]byte
+	Part_name   [16]byte
 }

@@ -1,10 +1,12 @@
 package globals
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -40,5 +42,39 @@ func GetRandom() int {
 }
 
 func ByteToString(byteArray []byte) string {
-	return string(byteArray[:])
+	temp := bytes.Trim(byteArray, "\x00")
+	str := string(temp[:])
+	return str
+}
+
+func ByteToInt(byteArray []byte) int {
+	return ToInt(ByteToString(byteArray))
+}
+
+func ToInt(stringValue string) int {
+	res, err := strconv.Atoi(stringValue)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return res
+}
+
+func BubbleSort(array []Partition) {
+	for i := 0; i < len(array)-1; i++ {
+		for j := 0; j < len(array)-i-1; j++ {
+			if ToInt(ByteToString(array[j].Part_start[:])) > ToInt(ByteToString(array[j+1].Part_start[:])) {
+				array[j], array[j+1] = array[j+1], array[j]
+			}
+		}
+	}
+}
+
+func SortFreeSpaces(array []VoidSpace) {
+	for i := 0; i < len(array)-1; i++ {
+		for j := 0; j < len(array)-i-1; j++ {
+			if array[j].Size > array[j+1].Size {
+				array[j], array[j+1] = array[j+1], array[j]
+			}
+		}
+	}
 }
