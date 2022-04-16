@@ -65,6 +65,48 @@ func (cmd *FdiskCmd) Fdisk() {
 					return
 				}
 
+				for i := 0; i < 4; i++ {
+					if globals.ByteToString(MBR.Partitions[i].Part_type[:]) == "e" {
+						// SI ES UNA PARTICION EXTENDIDA BUSCO ENTRE TODAS SUS LOGICAS
+						actualEbr := globals.EBR{}
+						// LEO EL PRIMER EBR
+						sizeEbr := int(unsafe.Sizeof(actualEbr))
+						file.Seek(int64(globals.ByteToInt(MBR.Partitions[i].Part_start[:])), 0)
+						dataEbr := globals.ReadBytes(file, sizeEbr)
+						bufferebr := bytes.NewBuffer(dataEbr)
+						errEbr := binary.Read(bufferebr, binary.BigEndian, &actualEbr)
+						if errEbr != nil {
+							log.Fatal("Error ", errEbr)
+							return
+						}
+						if globals.ByteToString(actualEbr.Part_name[:]) == cmd.Name || globals.ByteToString(MBR.Partitions[i].Part_name[:]) == cmd.Name {
+							fmt.Println("Error: la particion con el nombre " + cmd.Name + " ya existe en el disco " + cmd.Path)
+							return
+						}
+						// RECORRO TODOS LOS EBR
+						for globals.ByteToInt(actualEbr.Part_next[:]) != -1 {
+							size := int(unsafe.Sizeof(actualEbr))
+							file.Seek(int64(globals.ByteToInt(actualEbr.Part_next[:])), 0)
+							data := globals.ReadBytes(file, size)
+							buffer := bytes.NewBuffer(data)
+							err1 := binary.Read(buffer, binary.BigEndian, &actualEbr)
+							if err1 != nil {
+								log.Fatal("Error ", err1)
+								return
+							}
+							if globals.ByteToString(actualEbr.Part_name[:]) == cmd.Name {
+								fmt.Println("Error: la particion con el nombre " + cmd.Name + " ya existe en el disco " + cmd.Path)
+								return
+							}
+						}
+					} else {
+						if globals.ByteToString(MBR.Partitions[i].Part_name[:]) == cmd.Name {
+							fmt.Println("Error: la particion con el nombre " + cmd.Name + " ya existe en el disco " + cmd.Path)
+							return
+						}
+					}
+				}
+
 				// CALCULO DE MULTIPLICADOR PARA ASIGNAR ESPACIO A LA PARTICION
 				multiplicator := 1024
 				if cmd.Unit == "b" {
@@ -174,7 +216,9 @@ func (cmd *FdiskCmd) Fdisk() {
 									copy(EBR.Part_size[:], "-1")
 									copy(EBR.Part_next[:], "-1")
 									copy(EBR.Part_name[:], "")
-									file.Seek(0, 0)
+									// ME POSICIONO AL INICIO DE LA PARTICION EXTENDIDA
+									file.Seek(int64(selectVoidSpace), 0)
+									// ESCRIBO EL PRIMER EBR EN EL DISCO
 									var bufferControl bytes.Buffer
 									binary.Write(&bufferControl, binary.BigEndian, &EBR)
 									globals.WriteBytes(file, bufferControl.Bytes())
@@ -193,8 +237,86 @@ func (cmd *FdiskCmd) Fdisk() {
 					}
 				} else {
 					if totalExtended == 1 {
-						fmt.Println("trabajar como logica")
-						fmt.Println(extendedPartition)
+						fit := ""
+						if cmd.Fit == "" {
+							fit = "wf"
+						}
+						// EBR A ESCRIBIR
+						EBR := globals.EBR{}
+						// LEO EL PRIMER EBR
+						tempEbr := globals.EBR{} // VARIABLE PARA RECORRER LA LISTA DE EBR
+						size := int(unsafe.Sizeof(tempEbr))
+						file.Seek(int64(globals.ByteToInt(extendedPartition.Part_start[:])), 0)
+						data := globals.ReadBytes(file, size)
+						bufferebr := bytes.NewBuffer(data)
+						err1 := binary.Read(bufferebr, binary.BigEndian, &tempEbr)
+						if err1 != nil {
+							log.Fatal("Error ", err1)
+							return
+						}
+						//VARIABLE PARA GUARDAR DONDE SE VA A ESCRIBIR EL EBR
+						startToWrite := 0
+						if globals.ByteToString(tempEbr.Part_start[:]) == "-1" {
+							// CALCULA QUE LA PARTICION QUEPA
+							if (globals.ByteToInt(extendedPartition.Part_size[:]) - int(unsafe.Sizeof(EBR))) >= (cmd.Size * multiplicator) {
+								// CALCULA DONDE INICIA LA PRIMERA PARTICION LOGICA
+								start := globals.ByteToInt(extendedPartition.Part_start[:]) + int(unsafe.Sizeof(EBR)) + 1
+								startToWrite = globals.ByteToInt(extendedPartition.Part_start[:])
+								// ASIGNA LOS VALORES AL PRIMER EBR
+								copy(EBR.Part_status[:], []byte("0"))
+								copy(EBR.Part_fit[:], []byte(fit))
+								copy(EBR.Part_start[:], []byte(strconv.Itoa(start)))
+								copy(EBR.Part_size[:], []byte(strconv.Itoa(cmd.Size*multiplicator)))
+								copy(EBR.Part_next[:], []byte("-1"))
+								copy(EBR.Part_name[:], []byte(cmd.Name))
+							} else {
+								fmt.Println("Error: la particion lógica " + cmd.Name + " no cabe en el disco " + cmd.Path)
+								return
+							}
+						} else {
+							for globals.ByteToInt(tempEbr.Part_next[:]) != -1 {
+								size := int(unsafe.Sizeof(tempEbr))
+								file.Seek(int64(globals.ByteToInt(tempEbr.Part_next[:])), 0)
+								data := globals.ReadBytes(file, size)
+								buffer := bytes.NewBuffer(data)
+								err1 := binary.Read(buffer, binary.BigEndian, &tempEbr)
+								if err1 != nil {
+									log.Fatal("Error ", err1)
+									return
+								}
+								//fmt.Println(globals.ByteToString(tempEbr.Part_name[:]), globals.ByteToString(tempEbr.Part_status[:]))
+							}
+							if ((globals.ByteToInt(extendedPartition.Part_start[:]) + globals.ByteToInt(extendedPartition.Part_size[:])) - (globals.ByteToInt(tempEbr.Part_start[:]) + globals.ByteToInt(tempEbr.Part_size[:]))) >= (cmd.Size * multiplicator) {
+								// CALCULA DONDE INICIA LA PARTICION LOGICA
+								start := globals.ByteToInt(tempEbr.Part_start[:]) + globals.ByteToInt(tempEbr.Part_size[:]) + int(unsafe.Sizeof(EBR)) + 2
+								// CALCULA DONDE SE VA A ESCRIBIR EL EBR
+								startToWrite = globals.ByteToInt(tempEbr.Part_start[:]) + globals.ByteToInt(tempEbr.Part_size[:]) + 1
+								// ASIGNA LOS VALORES AL PRIMER EBR
+								copy(EBR.Part_status[:], []byte("0"))
+								copy(EBR.Part_fit[:], []byte(fit))
+								copy(EBR.Part_start[:], []byte(strconv.Itoa(start)))
+								copy(EBR.Part_size[:], []byte(strconv.Itoa(cmd.Size*multiplicator)))
+								copy(EBR.Part_next[:], []byte("-1"))
+								copy(EBR.Part_name[:], []byte(cmd.Name))
+								// APUNTO EL SIGUIENTE DE TEMPORAL AL INICIO DEL ACTUAL CREADO
+								copy(tempEbr.Part_next[:], []byte(strconv.Itoa(startToWrite)))
+								// REESCRIBO EL EBR TEMPORAL
+								//fmt.Println(cmd.Name, startToWrite)
+								//fmt.Println(globals.ByteToString(tempEbr.Part_name[:]), globals.ByteToInt(tempEbr.Part_start[:])-(int(unsafe.Sizeof(tempEbr))+1))
+								file.Seek(int64(globals.ByteToInt(tempEbr.Part_start[:])-(int(unsafe.Sizeof(tempEbr))+1)), 0)
+								var bufferControlTemp bytes.Buffer
+								binary.Write(&bufferControlTemp, binary.BigEndian, &tempEbr)
+								globals.WriteBytes(file, bufferControlTemp.Bytes())
+							} else {
+								fmt.Println("Error: la particion lógica " + cmd.Name + " no cabe en el disco " + cmd.Path)
+								return
+							}
+						}
+						// ESCRIBO EL EBR EN EL DISCO
+						file.Seek(int64(startToWrite), 0)
+						var bufferControl bytes.Buffer
+						binary.Write(&bufferControl, binary.BigEndian, &EBR)
+						globals.WriteBytes(file, bufferControl.Bytes())
 					} else {
 						fmt.Println("Error: la particion " + cmd.Name + " no puede ser creada debido no existe particion extendida")
 						return

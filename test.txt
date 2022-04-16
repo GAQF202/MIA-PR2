@@ -8,4 +8,11 @@ fdisk -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition
 fdisk -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition1
 fdisk -type=p -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition2
 fdisk -type=e -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition3
-fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=90 -name=logic1
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic1
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic2
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic3
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic4 
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic5 -fit=wb
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic6 
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic7
+fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic8
