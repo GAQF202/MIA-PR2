@@ -16,3 +16,7 @@ fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic5 -fit=wb
 fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic6 
 fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic7
 fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic8
+
+mount -path=/hola/gerson/ver/disk1.dk -name=myPartition1
+
+mkfs -id=571A -type=fast

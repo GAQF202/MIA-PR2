@@ -16,6 +16,8 @@ type VoidSpace struct {
 	Size  int
 }
 
+// STRUCTS PARA SISTEMA DE DISCOS
+
 type Partition struct {
 	Part_status [3]byte
 	Part_type   [4]byte
@@ -40,4 +42,52 @@ type EBR struct {
 	Part_size   [16]byte
 	Part_next   [16]byte
 	Part_name   [16]byte
+}
+
+// STRUCTS PARA SISTEMA DE ARCHIVOS
+type SuperBloque struct {
+	Filesystem_type   [32]byte
+	Inodes_count      [32]byte
+	Blocks_count      [32]byte
+	Free_blocks_count [32]byte
+	Free_inodes_count [32]byte
+	Mtime             [23]byte
+	Mnt_count         [32]byte
+	Magic             [32]byte
+	Inode_size        [32]byte
+	Block_size        [32]byte
+	First_inode       [32]byte
+	First_block       [32]byte
+	Bm_inode_start    [32]byte
+	Bm_block_start    [32]byte
+	Inode_start       [32]byte
+	Block_start       [32]byte
+}
+
+type InodeTable struct {
+	Uid   [32]byte
+	Gid   [32]byte
+	Size  [32]byte
+	Atime [23]byte
+	Ctime [23]byte
+	Mtime [23]byte
+	Block [16]byte
+	Type  [4]byte
+	Perm  [32]byte
+}
+
+// CONTENIDO DE CARPETA
+type ContentFile struct {
+	Name  [12]byte
+	Inodo [32]byte
+}
+
+// BLOQUE DE CARPETA
+type FileBlock struct {
+	Content [4]ContentFile
+}
+
+// BLOQUE DE ARCHIVO
+type ArchiveBlock struct {
+	Content [64]byte
 }

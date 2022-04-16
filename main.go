@@ -30,6 +30,14 @@ func main() {
 			fdisk := commands.FdiskCmd{}
 			fdisk.AssignParameters(element)
 			fdisk.Fdisk()
+		} else if element.Name == "mount" {
+			mount := commands.MountCmd{}
+			mount.AssignParameters(element)
+			mount.Mount()
+		} else if element.Name == "mkfs" {
+			mkfs := commands.MkfsCmd{}
+			mkfs.AssignParameters(element)
+			mkfs.Mkfs()
 		}
 	}
 }

@@ -67,6 +67,14 @@ func AnalyzerF() []globals.Command {
 					tree = append(tree, tempCommand)
 					tempCommand = newCommand(tempWord)
 					tempWord = ""
+				} else if tempWord == "mount" {
+					tree = append(tree, tempCommand)
+					tempCommand = newCommand(tempWord)
+					tempWord = ""
+				} else if tempWord == "mkfs" {
+					tree = append(tree, tempCommand)
+					tempCommand = newCommand(tempWord)
+					tempWord = ""
 				} else if tempWord == "-size=" {
 					tempPar = newParameter("size", "", -1)
 					tempWord = ""
@@ -94,6 +102,11 @@ func AnalyzerF() []globals.Command {
 					isIntValue = false
 				} else if tempWord == "-name=" {
 					tempPar = newParameter("name", "", -1)
+					tempWord = ""
+					findValue = true
+					isIntValue = false
+				} else if tempWord == "-id=" {
+					tempPar = newParameter("id", "", -1)
 					tempWord = ""
 					findValue = true
 					isIntValue = false
