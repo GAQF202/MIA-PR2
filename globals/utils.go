@@ -78,3 +78,8 @@ func SortFreeSpaces(array []VoidSpace) {
 		}
 	}
 }
+
+// FUNCION PARA BORRAR ELEMENTO POR INIDICE DE UN ARRAY
+func RemoveIndex(s []string, index int) []string {
+	return append(s[:index], s[index+1:]...)
+}

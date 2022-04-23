@@ -55,6 +55,7 @@ func AnalyzerF() []globals.Command {
 		if !findValue {
 			if letter != " " && letter != "\n" {
 				tempWord += letter
+				// COMANDOS PARA DISCOS
 				if tempWord == "mkdisk" {
 					tree = append(tree, tempCommand)
 					tempCommand = newCommand(tempWord)
@@ -75,6 +76,12 @@ func AnalyzerF() []globals.Command {
 					tree = append(tree, tempCommand)
 					tempCommand = newCommand(tempWord)
 					tempWord = ""
+					// COMANDOS PARA SISTEMAS DE ARCHIVOS
+				} else if tempWord == "mkdir" {
+					tree = append(tree, tempCommand)
+					tempCommand = newCommand(tempWord)
+					tempWord = ""
+					// PARAMETROS
 				} else if tempWord == "-size=" {
 					tempPar = newParameter("size", "", -1)
 					tempWord = ""
@@ -110,6 +117,26 @@ func AnalyzerF() []globals.Command {
 					tempWord = ""
 					findValue = true
 					isIntValue = false
+					// PARAMETROS DE UNA SOLA LETRA
+				} else if tempWord == "-p" {
+					// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
+					if i == (len(input) - 1) {
+						tempPar = newParameter("-p", "-p", -1)
+						tempWord = ""
+						tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+						// GUARDO COMANDO EN EL ARBOL DE COMANDOS
+						tree = append(tree, tempCommand)
+					} else {
+						// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
+						if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" {
+							tempPar = newParameter("-p", "-p", -1)
+							tempWord = ""
+							tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+							// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+						} else {
+							continue
+						}
+					}
 				}
 			}
 		} else {

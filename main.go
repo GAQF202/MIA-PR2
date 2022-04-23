@@ -10,6 +10,7 @@ package main
 import (
 	"github.com/PR2_MIA/analyzer"
 	"github.com/PR2_MIA/commands"
+	"github.com/PR2_MIA/systemCommands"
 	//"github.com/PR2_MIA/commands"
 )
 
@@ -38,6 +39,10 @@ func main() {
 			mkfs := commands.MkfsCmd{}
 			mkfs.AssignParameters(element)
 			mkfs.Mkfs()
+		} else if element.Name == "mkdir" {
+			mkdir := systemCommands.MkdirCmd{}
+			mkdir.AssignParameters(element)
+			mkdir.Mkdir()
 		}
 	}
 }

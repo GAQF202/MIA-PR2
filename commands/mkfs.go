@@ -72,7 +72,6 @@ func (cmd *MkfsCmd) Mkfs() {
 		fileBlock := globals.FileBlock{}
 
 		n := (mounted.Size - int(unsafe.Sizeof(super_bloque))) / (4 + int(unsafe.Sizeof(inode)) + (3 * (int(unsafe.Sizeof(fileBlock)))))
-		fmt.Println(n)
 
 		// INGRESO TODOS LOS VALORES DEL SUPERBLOQUE
 		copy(super_bloque.Mnt_count[:], []byte(strconv.Itoa(1)))
@@ -87,13 +86,43 @@ func (cmd *MkfsCmd) Mkfs() {
 		copy(super_bloque.Block_size[:], []byte(strconv.Itoa(int(unsafe.Sizeof(fileBlock)))))
 		copy(super_bloque.Bm_inode_start[:], []byte(strconv.Itoa((mounted.Start + int(unsafe.Sizeof(super_bloque))))))
 		copy(super_bloque.Filesystem_type[:], []byte(strconv.Itoa(2)))
-		copy(super_bloque.Bm_block_start[:], []byte(strconv.Itoa((mounted.Start + int(unsafe.Sizeof(super_bloque)) + n))))
+		copy(super_bloque.Bm_block_start[:], []byte(strconv.Itoa(globals.ByteToInt(super_bloque.Bm_inode_start[:])+n)))
 		copy(super_bloque.Inode_start[:], []byte(strconv.Itoa(((mounted.Start + int(unsafe.Sizeof(super_bloque)) + n) + (3 * n)))))
 		copy(super_bloque.Block_start[:], []byte(strconv.Itoa((((mounted.Start + int(unsafe.Sizeof(super_bloque)) + n) + (3 * n)) + (n + int(unsafe.Sizeof(inode)))))))
 		copy(super_bloque.Mnt_count[:], []byte(globals.GetDate()))
 
+		// ESCRIBO EL SUPERBLOQUE EN EL DISCO
+		file.Seek(int64(mounted.Start), 0)
+		var bufferControl bytes.Buffer
+		binary.Write(&bufferControl, binary.BigEndian, &super_bloque)
+		globals.WriteBytes(file, bufferControl.Bytes())
+
+		// CREACION DE BITMAPS
+		// INODOS
 		var bitinodes = make([]byte, n)
-		bitinodes[0] = '0'
+		for i := 0; i < n; i++ {
+			bitinodes[i] = '0'
+		}
+		// OBTENGO LA POSICION DE BITMAP DE INODOS DEL SUPERBLOQUE
+		bInodePos := globals.ByteToInt(super_bloque.Bm_inode_start[:])
+		file.Seek(int64(bInodePos), 0)
+		var bufferControlInodes bytes.Buffer
+		binary.Write(&bufferControlInodes, binary.BigEndian, &bitinodes)
+		globals.WriteBytes(file, bufferControlInodes.Bytes())
+
+		// BLOQUES
+		var bitblocks = make([]byte, (3 * n))
+		for i := 0; i < 3*n; i++ {
+			bitblocks[i] = '0'
+		}
+		// OBTENGO LA POSICION DE BITMAP DE INODOS DEL SUPERBLOQUE
+		bBlockPos := globals.ByteToInt(super_bloque.Bm_block_start[:])
+		file.Seek(int64(bBlockPos), 0)
+		var bufferControlBlocks bytes.Buffer
+		binary.Write(&bufferControlBlocks, binary.BigEndian, &bitblocks)
+		globals.WriteBytes(file, bufferControlBlocks.Bytes())
+
+		//fmt.Println(bInodePos, bBlockPos, n)
 
 	} else {
 		fmt.Println("Error: el parametro id es obligatorio en el comando mkfs")

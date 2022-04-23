@@ -71,7 +71,7 @@ type InodeTable struct {
 	Atime [23]byte
 	Ctime [23]byte
 	Mtime [23]byte
-	Block [16]byte
+	Block [16]int32
 	Type  [4]byte
 	Perm  [32]byte
 }
@@ -79,7 +79,7 @@ type InodeTable struct {
 // CONTENIDO DE CARPETA
 type ContentFile struct {
 	Name  [12]byte
-	Inodo [32]byte
+	Inodo int32
 }
 
 // BLOQUE DE CARPETA
