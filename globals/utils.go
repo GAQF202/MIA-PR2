@@ -3,6 +3,7 @@ package globals
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -82,4 +83,17 @@ func SortFreeSpaces(array []VoidSpace) {
 // FUNCION PARA BORRAR ELEMENTO POR INIDICE DE UN ARRAY
 func RemoveIndex(s []string, index int) []string {
 	return append(s[:index], s[index+1:]...)
+}
+
+// FUNCION PARA OBTENER EL CONTENIDO DE UN ARCHIVO
+func ReadFile(file_name string) string {
+	// LEER EL ARREGLO DE BYTES DEL ARCHIVO
+	datosComoBytes, err := ioutil.ReadFile(file_name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// CONVERTIR EL ARREGLO A STRING
+	datosComoString := string(datosComoBytes)
+
+	return datosComoString
 }

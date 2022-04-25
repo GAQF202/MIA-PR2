@@ -26,10 +26,10 @@ func ReadBitMap(file *os.File, position int, bitmap_size int) []byte {
 }
 
 // FUNCION PARA LEER SUPERBLOQUE
-func ReadSuperBlock(file *os.File, position int, sb_size int) globals.SuperBloque {
+func ReadSuperBlock(file *os.File, position int) globals.SuperBloque {
 	var super_bloque = globals.SuperBloque{}
 
-	size := int(sb_size)
+	size := int(unsafe.Sizeof(super_bloque))
 	file.Seek(int64(position), 0)
 	data := globals.ReadBytes(file, size)
 	buffer := bytes.NewBuffer(data)
@@ -68,4 +68,49 @@ func ReadFileBlock(file *os.File, position int) globals.FileBlock {
 		log.Fatal("Error ", err1)
 	}
 	return block
+}
+
+// FUNCION PARA LEER INODOS DEL DISCO EN LA PARTICION
+func ReadFileMbr(file *os.File, position int) globals.MBR {
+	var mbr = globals.MBR{}
+
+	size := int(unsafe.Sizeof(mbr))
+	file.Seek(int64(position), 0)
+	data := globals.ReadBytes(file, size)
+	buffer := bytes.NewBuffer(data)
+	err1 := binary.Read(buffer, binary.BigEndian, &mbr)
+	if err1 != nil {
+		log.Fatal("Error ", err1)
+	}
+	return mbr
+}
+
+// FUNCION PARA LEER PARTICIONES DEL DISCO
+func ReadPartition(file *os.File, position int) globals.Partition {
+	var partition = globals.Partition{}
+
+	size := int(unsafe.Sizeof(partition))
+	file.Seek(int64(position), 0)
+	data := globals.ReadBytes(file, size)
+	buffer := bytes.NewBuffer(data)
+	err1 := binary.Read(buffer, binary.BigEndian, &partition)
+	if err1 != nil {
+		log.Fatal("Error ", err1)
+	}
+	return partition
+}
+
+// FUNCION PARA LEER EBR DEL DISCO
+func ReadEbr(file *os.File, position int) globals.EBR {
+	var ebr = globals.EBR{}
+
+	size := int(unsafe.Sizeof(ebr))
+	file.Seek(int64(position), 0)
+	data := globals.ReadBytes(file, size)
+	buffer := bytes.NewBuffer(data)
+	err1 := binary.Read(buffer, binary.BigEndian, &ebr)
+	if err1 != nil {
+		log.Fatal("Error ", err1)
+	}
+	return ebr
 }

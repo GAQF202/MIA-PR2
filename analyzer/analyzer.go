@@ -46,6 +46,9 @@ func AnalyzerF() []globals.Command {
 	tempStringValue := ""
 	isIntValue := false
 
+	// VARIABLE PARA MANEJO DE COMENTARIOS
+	isComment := false
+
 	// BANDERA QUE INDICA QUE AUN NO ENCUENTRA UN CARACTER DISTINTO DE " " DESPUES DE "="
 	valueFound := false
 
@@ -81,6 +84,14 @@ func AnalyzerF() []globals.Command {
 					tree = append(tree, tempCommand)
 					tempCommand = newCommand(tempWord)
 					tempWord = ""
+				} else if tempWord == "mkfile" {
+					tree = append(tree, tempCommand)
+					tempCommand = newCommand(tempWord)
+					tempWord = ""
+				} else if tempWord == "rep" {
+					tree = append(tree, tempCommand)
+					tempCommand = newCommand(tempWord)
+					tempWord = ""
 					// PARAMETROS
 				} else if tempWord == "-size=" {
 					tempPar = newParameter("size", "", -1)
@@ -102,6 +113,11 @@ func AnalyzerF() []globals.Command {
 					tempWord = ""
 					findValue = true
 					isIntValue = false
+				} else if tempWord == "-ruta=" {
+					tempPar = newParameter("ruta", "", -1)
+					tempWord = ""
+					findValue = true
+					isIntValue = false
 				} else if tempWord == "-type=" {
 					tempPar = newParameter("type", "", -1)
 					tempWord = ""
@@ -114,6 +130,11 @@ func AnalyzerF() []globals.Command {
 					isIntValue = false
 				} else if tempWord == "-id=" {
 					tempPar = newParameter("id", "", -1)
+					tempWord = ""
+					findValue = true
+					isIntValue = false
+				} else if tempWord == "-cont=" {
+					tempPar = newParameter("cont", "", -1)
 					tempWord = ""
 					findValue = true
 					isIntValue = false
@@ -137,8 +158,33 @@ func AnalyzerF() []globals.Command {
 							continue
 						}
 					}
+				} else if tempWord == "-r" {
+					// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
+					if i == (len(input) - 1) {
+						tempPar = newParameter("-r", "-r", -1)
+						tempWord = ""
+						tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+						// GUARDO COMANDO EN EL ARBOL DE COMANDOS
+						tree = append(tree, tempCommand)
+					} else {
+						// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
+						if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" {
+							tempPar = newParameter("-r", "-r", -1)
+							tempWord = ""
+							tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+							// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+						} else {
+							continue
+						}
+					}
+				} else if tempWord == "#" {
+					tempPar = newParameter("comment", "", -1)
+					tempWord = ""
+					isComment = true
 				}
 			}
+		} else if isComment {
+
 		} else {
 			tempWord += letter
 			if letter == " " && !valueFound {

@@ -166,7 +166,7 @@ func (cmd *MkdirCmd) Mkdir() {
 			}
 		}
 		if !exist_route {
-			if cmd.Path != "" {
+			if cmd.P != "" {
 				// SI SOLAMENTE ESTA CREADA LA RAIZ LA ELIMINO DE LAS RUTAS RESTANTES
 				if len(remaining_routes) == len(routes) {
 					remaining_routes = globals.RemoveIndex(remaining_routes, 0)
@@ -309,9 +309,30 @@ func (cmd *MkdirCmd) Mkdir() {
 							// Y GUARDO EL NOMBRE DEL DIRECTORIO ACTUAL
 							actual_block.Content[indice_encontrado].Inodo = int32(free_inode)
 							copy(actual_block.Content[indice_encontrado].Name[:], []byte(remaining_routes[route_index]))
+
+							// ESCRIBO EL INODO
+							read.WriteInodes(file, (globals.ByteToInt(super_bloque.Inode_start[:]) + (free_inode * int(unsafe.Sizeof(newInode)))), newInode)
+							// ESCRIBO EL BLOQUE
+							read.WriteFileBlocks(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (int(temp_inode.Block[pointer]) * int(unsafe.Sizeof(actual_block)))), actual_block)
+
+							// REESCRIBO EL SUPERBLOQUE
+							read.WriteSuperBlock(file, partition_m.Start, super_bloque)
+
+							// REESCRIBO BITMAPS
+							read.WriteBitmap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), bitinodes)
+							read.WriteBitmap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), bitblocks)
+							// RECORRO EL ARBOL
+							temp_inode = newInode
+							index_temp_inode = free_inode
+							break
+						} else {
+							continue
 						}
 					}
 				}
+			} else {
+				fmt.Println("Error: la ruta no existe, para crearla usa el parametro -p")
+				return
 			}
 		}
 	}

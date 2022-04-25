@@ -43,6 +43,14 @@ func main() {
 			mkdir := systemCommands.MkdirCmd{}
 			mkdir.AssignParameters(element)
 			mkdir.Mkdir()
+		} else if element.Name == "mkfile" {
+			mkfile := systemCommands.MkfileCmd{}
+			mkfile.AssignParameters(element)
+			mkfile.Mkfile()
+		} else if element.Name == "rep" {
+			rep := commands.RepCmd{}
+			rep.AssignParameters(element)
+			rep.Rep()
 		}
 	}
 }

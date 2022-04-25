@@ -21,4 +21,10 @@ mount -path=/hola/gerson/ver/disk1.dk -name=myPartition1
 
 mkfs -id=571A -type=fast
 
-mkdir -p -path=/
+mkdir -path=/ -p 
+
+mkdir -p -path=/gerson
+
+mkfile -size=15 -path=/aja/yea.txt -r
+
+rep -id=571A -name=disk -path=/hola/myReports/hello.png
