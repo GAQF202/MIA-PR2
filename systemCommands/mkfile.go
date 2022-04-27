@@ -136,6 +136,12 @@ func (cmd *MkfileCmd) Mkfile() {
 				exist_route = false
 			}
 		}
+		// VALIDACION PARA SABER SI EL ARCHIVO SE CREA EN LA RAIZ
+		if routes[0] == "/" && len(routes) == 1 {
+			temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:]))
+			index_temp_inode = 0
+			exist_route = true
+		}
 		//VERIFICACION DE EXISTENCIA DE RUTAS
 		if !exist_route {
 			// IGUALO EL index_temp_inode AL INDICE DE LA ULTIMA RUTA ENCONTRADA

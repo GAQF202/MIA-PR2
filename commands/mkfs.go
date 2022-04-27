@@ -10,6 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/PR2_MIA/globals"
+	"github.com/PR2_MIA/systemCommands"
 )
 
 type MkfsCmd struct {
@@ -122,7 +123,19 @@ func (cmd *MkfsCmd) Mkfs() {
 		binary.Write(&bufferControlBlocks, binary.BigEndian, &bitblocks)
 		globals.WriteBytes(file, bufferControlBlocks.Bytes())
 
-		//fmt.Println(bInodePos, bBlockPos, n)
+		// CREO LA CARPETA RAIZ
+		c := systemCommands.MkdirCmd{}
+		c.Path = "/"
+		c.P = "-p"
+		c.Mkdir()
+
+		d := systemCommands.MkfileCmd{}
+		d.AnyText = "1,G,root\n1,U,root,root,1234\n"
+		d.Cont = ""
+		d.Path = "/users.txt"
+		d.R = "-r"
+		d.Size = 0
+		d.Mkfile()
 
 	} else {
 		fmt.Println("Error: el parametro id es obligatorio en el comando mkfs")
