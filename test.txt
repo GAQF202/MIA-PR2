@@ -29,6 +29,8 @@ mkfs -id=571A -type=fast
 login -usuario=root -password=123 -id=571A
 Mkdir -P  -path=/home/archivos/mia/fase2
 Mkdir -P  -path=/home/archivos/mia/carpeta2
+logout
+login -usuario=root -password=123 -id=571A
 Mkdir -P  -path=/home/archivos/mia/z
 #Mkdir -P  -path=/home/archivos/mia/carpeta3/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
 #Mkdir -P  -path=/home/archivos/mia/carpeta4/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11

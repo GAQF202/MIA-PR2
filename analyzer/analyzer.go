@@ -104,6 +104,10 @@ func AnalyzerF() []globals.Command {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
+					} else if tempWord == "logout" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
 						// PARAMETROS
 					} else if tempWord == "-size=" {
 						tempPar = newParameter("size", "", -1)

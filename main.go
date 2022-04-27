@@ -60,6 +60,8 @@ func main() {
 			login := users.LoginCmd{}
 			login.AssignParameters(element)
 			login.Login()
+		} else if element.Name == "logout" {
+			users.Logout()
 		}
 	}
 }
