@@ -91,3 +91,21 @@ type FileBlock struct {
 type ArchiveBlock struct {
 	Content [64]byte
 }
+
+// STRUCTS PARA SISTEMA DE USUARIOS
+
+// STRUCT DE USUARIO
+type User struct {
+	Uid      string
+	Type     string
+	Group    string
+	User     string
+	Password string
+}
+
+// STRUCT DE GRUPO
+type Group struct {
+	Gid   string
+	Type  string
+	Group string
+}

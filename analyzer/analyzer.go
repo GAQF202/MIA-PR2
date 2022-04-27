@@ -99,6 +99,11 @@ func AnalyzerF() []globals.Command {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
+						// COMANDOS PARA USUARIOS
+					} else if tempWord == "login" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
 						// PARAMETROS
 					} else if tempWord == "-size=" {
 						tempPar = newParameter("size", "", -1)
@@ -142,6 +147,16 @@ func AnalyzerF() []globals.Command {
 						isIntValue = false
 					} else if tempWord == "-cont=" {
 						tempPar = newParameter("cont", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-usuario=" {
+						tempPar = newParameter("usuario", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-password=" {
+						tempPar = newParameter("password", "", -1)
 						tempWord = ""
 						findValue = true
 						isIntValue = false

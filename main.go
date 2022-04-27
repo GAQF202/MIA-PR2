@@ -11,6 +11,7 @@ import (
 	"github.com/PR2_MIA/analyzer"
 	"github.com/PR2_MIA/commands"
 	"github.com/PR2_MIA/systemCommands"
+	"github.com/PR2_MIA/users"
 	//"github.com/PR2_MIA/commands"
 )
 
@@ -55,6 +56,10 @@ func main() {
 			comment := commands.Comment{}
 			comment.AssignParameters(element)
 			comment.ShowComment()
+		} else if element.Name == "login" {
+			login := users.LoginCmd{}
+			login.AssignParameters(element)
+			login.Login()
 		}
 	}
 }

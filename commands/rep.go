@@ -248,7 +248,7 @@ func (cmd *RepCmd) Rep() {
 				nodes += createPortTd(globals.ByteToString(temp_inode.Mtime[:]), "")
 				nodes += "</tr>\n"
 
-				for block_index := 0; block_index < 14; block_index++ {
+				for block_index := 0; block_index < 16; block_index++ {
 					nodes += "<tr>"
 					nodes += createPortTd("AP"+strconv.Itoa(block_index), "")
 					nodes += createPortTd(strconv.Itoa(int(temp_inode.Block[block_index])), "i"+strconv.Itoa(i)+"b"+strconv.Itoa(int(temp_inode.Block[block_index])))

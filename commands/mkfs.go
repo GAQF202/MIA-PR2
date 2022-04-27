@@ -130,12 +130,21 @@ func (cmd *MkfsCmd) Mkfs() {
 		c.Mkdir()
 
 		d := systemCommands.MkfileCmd{}
-		d.AnyText = "1,G,root\n1,U,root,root,1234\n"
+		d.AnyText = "1,G,root\n1,U,root,root,123\n"
 		d.Cont = ""
 		d.Path = "/users.txt"
 		d.R = "-r"
 		d.Size = 0
 		d.Mkfile()
+
+		// CIERRO SESION
+		globals.GlobalUser.Logged = -1
+		globals.GlobalUser.Uid = ""
+		globals.GlobalUser.User_name = ""
+		globals.GlobalUser.Pwd = ""
+		globals.GlobalUser.Grp = ""
+		globals.GlobalUser.Id_partition = ""
+		globals.GlobalUser.Gid = ""
 
 	} else {
 		fmt.Println("Error: el parametro id es obligatorio en el comando mkfs")

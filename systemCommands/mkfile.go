@@ -340,7 +340,7 @@ func (cmd *MkfileCmd) Mkfile() {
 
 		// SI LE PASO TEXTO POR A PARTE HACE EL CALCULO
 		if cmd.AnyText != "" {
-			content = cmd.Cont
+			content = cmd.AnyText
 			content_size = len(cmd.AnyText)
 		}
 
