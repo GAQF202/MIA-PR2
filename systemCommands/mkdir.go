@@ -68,7 +68,7 @@ func (cmd *MkdirCmd) Mkdir() {
 	var bitinodes = make([]byte, globals.ByteToInt(super_bloque.Inodes_count[:]))
 	var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
 	bitinodes = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitinodes))
-	bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitblocks))
+	bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))
 
 	// CREA LA RAIZ
 	if len(routes) == 1 {
@@ -124,18 +124,22 @@ func (cmd *MkdirCmd) Mkdir() {
 	} else {
 		temp_inode := globals.InodeTable{}
 		var index_temp_inode int
+		catch_inode_index := 0
 		// LEO EL PRIMER INODO
 		temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:]))
 		exist_route := false
 
 		// VECTOR PARA GUARDAR LAS RUTAS QUE FALTAN POR CREARSE
-		var remaining_routes = routes
+		var remaining_routes = make([]string, len(routes))
+		// CREO UNA COPIA PARA QUE NO SE ALTERE EL ROUTE
+		copy(remaining_routes, routes)
 
 		// RECORRE LA RUTA
 		for path_index := 0; path_index < len(routes); path_index++ {
 			exist_path := false
 			// RECORRE PUNTEROS DEL INODO
 			for pointerIndex := 0; pointerIndex < 16; pointerIndex++ {
+
 				// RECORRO SOLO LOS BLOQUES DE LOS INODOS DE TIPO CARPETA
 				if temp_inode.Block[pointerIndex] != -1 && globals.ByteToString(temp_inode.Type[:]) == "0" {
 					file_block := globals.FileBlock{}
@@ -145,6 +149,7 @@ func (cmd *MkdirCmd) Mkdir() {
 					for blockIndex := 0; blockIndex < 4; blockIndex++ {
 						if file_block.Content[blockIndex].Inodo != -1 {
 							if globals.ByteToString(file_block.Content[blockIndex].Name[:]) == routes[path_index] {
+
 								// ELIMINO LAS RUTAS QUE YA ESTAN CREADAS PARA QUE QUEDEN SOLO LAS RESTANTES
 								if len(remaining_routes) == len(routes) {
 									remaining_routes = globals.RemoveIndex(remaining_routes, 0)
@@ -152,10 +157,14 @@ func (cmd *MkdirCmd) Mkdir() {
 								} else {
 									remaining_routes = globals.RemoveIndex(remaining_routes, 0)
 								}
+								// LEO EL INODO TEMPORAL
 								temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(int(file_block.Content[blockIndex].Inodo)*int(unsafe.Sizeof(temp_inode))))
-								index_temp_inode = int(file_block.Content[blockIndex].Inodo)
+								//fmt.Println(globals.ByteToInt(super_bloque.Inode_start[:]) + (int(file_block.Content[blockIndex].Inodo) * int(unsafe.Sizeof(temp_inode))))
+								//index_temp_inode = int(file_block.Content[blockIndex].Inodo)
 								exist_route = true
 								exist_path = true
+								// ATRAPA EL ULTIMO NUMBERO DE INODO QUE SE CREO
+								catch_inode_index = int(file_block.Content[blockIndex].Inodo)
 							}
 						}
 					}
@@ -166,11 +175,15 @@ func (cmd *MkdirCmd) Mkdir() {
 			}
 		}
 		if !exist_route {
-			if cmd.P != "" {
+			// IGUALO EL index_temp_inode AL INDICE DE LA ULTIMA RUTA ENCONTRADA
+			index_temp_inode = catch_inode_index
+			if cmd.P != "" || len(remaining_routes) == 1 {
+
 				// SI SOLAMENTE ESTA CREADA LA RAIZ LA ELIMINO DE LAS RUTAS RESTANTES
 				if len(remaining_routes) == len(routes) {
 					remaining_routes = globals.RemoveIndex(remaining_routes, 0)
 				}
+
 				// CREO LAS RUTAS RESTANTES
 				// RECORRO LAS RUTAS RESTANTES
 				for route_index := 0; route_index < len(remaining_routes); route_index++ {
@@ -179,9 +192,11 @@ func (cmd *MkdirCmd) Mkdir() {
 						var indice_encontrado int
 
 						actual_block := globals.FileBlock{}
+
 						// VERIFICA QUE SEA UN PUNTERO SIN UTILIZAR
 						if temp_inode.Block[pointer] != -1 {
 							actual_block = read.ReadFileBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(temp_inode.Block[pointer])*int(unsafe.Sizeof(actual_block))))
+
 							for block_index := 0; block_index < 4; block_index++ {
 								// VALIDACION DE PUNTERO LIBRE
 								if actual_block.Content[block_index].Inodo == -1 { // RECORRO EL BLOQUE LIBRE
@@ -238,6 +253,7 @@ func (cmd *MkdirCmd) Mkdir() {
 							copy(newInode.Uid[:], []byte(globals.GlobalUser.Uid))
 							copy(newInode.Gid[:], []byte(globals.GlobalUser.Gid))
 							copy(newInode.Size[:], []byte(strconv.Itoa(0)))
+							copy(newInode.Atime[:], []byte(globals.GetDate()))
 							copy(newInode.Ctime[:], []byte(globals.GetDate()))
 							copy(newInode.Mtime[:], []byte(globals.GetDate()))
 							// INICIALIZO LOS APUNTADORES
@@ -254,14 +270,17 @@ func (cmd *MkdirCmd) Mkdir() {
 							// APUNTO EL PRIMER PUNTERO DEL BLOQUE AL INODO CREADO
 							// Y GUARDO EL NOMBRE DEL NUEVO DIRECTORIO CREADO
 							real_block.Content[block_pointer].Inodo = int32(free_inode)
+
 							copy(real_block.Content[block_pointer].Name[:], []byte(remaining_routes[route_index]))
 
 							// ESCRIBO EL INODO NUEVO
 							read.WriteInodes(file, globals.ByteToInt(super_bloque.Inode_start[:])+(free_inode*int(unsafe.Sizeof(newInode))), newInode)
+							// AQUIII ESTA EL ERROR
 							read.WriteInodes(file, globals.ByteToInt(super_bloque.Inode_start[:])+(index_temp_inode*int(unsafe.Sizeof(temp_inode))), temp_inode)
-							// ESCRIBO EL BLOQUE
-							read.WriteFileBlocks(file, (globals.ByteToInt(super_bloque.Block_start[:]) + free_block + int(unsafe.Sizeof(real_block))), real_block)
 
+							// ESCRIBO EL BLOQUE
+							read.WriteFileBlocks(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (free_block * int(unsafe.Sizeof(real_block)))), real_block)
+							//fmt.Println((globals.ByteToInt(super_bloque.Block_start[:]) + (free_block * int(unsafe.Sizeof(real_block)))))
 							// REESCRIBO EL SUPERBLOQUE
 							read.WriteSuperBlock(file, partition_m.Start, super_bloque)
 
@@ -269,6 +288,9 @@ func (cmd *MkdirCmd) Mkdir() {
 							read.WriteBitmap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), bitinodes)
 							read.WriteBitmap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), bitblocks)
 
+							/*for i := 0; i < 4; i++ {
+								fmt.Println(real_block.Content[i].Inodo, globals.ByteToString(real_block.Content[i].Name[:]))
+							}*/
 							// RECORRO EL ARBOL
 							temp_inode = newInode
 							index_temp_inode = free_inode
@@ -314,6 +336,7 @@ func (cmd *MkdirCmd) Mkdir() {
 							read.WriteInodes(file, (globals.ByteToInt(super_bloque.Inode_start[:]) + (free_inode * int(unsafe.Sizeof(newInode)))), newInode)
 							// ESCRIBO EL BLOQUE
 							read.WriteFileBlocks(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (int(temp_inode.Block[pointer]) * int(unsafe.Sizeof(actual_block)))), actual_block)
+							//fmt.Println(globals.ByteToInt(super_bloque.Block_start[:]))
 
 							// REESCRIBO EL SUPERBLOQUE
 							read.WriteSuperBlock(file, partition_m.Start, super_bloque)

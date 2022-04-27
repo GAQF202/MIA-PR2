@@ -85,7 +85,7 @@ func (cmd *MkfileCmd) Mkfile() {
 		var bitinodes = make([]byte, globals.ByteToInt(super_bloque.Inodes_count[:]))
 		var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
 		bitinodes = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitinodes))
-		bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitblocks))
+		bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))
 
 		// VERIFICA QUE EXISTAN LAS CARPETAS ANTES DEL ARCHIVO
 
@@ -133,6 +133,7 @@ func (cmd *MkfileCmd) Mkfile() {
 		}
 		//VERIFICACION DE EXISTENCIA DE RUTAS
 		if !exist_route {
+			//fmt.Println("Entraa", remaining_routes)
 			// CREA LAS RUTAS FALTANTES
 			if cmd.R != "" {
 				// CREA LAS RUTAS
@@ -243,6 +244,8 @@ func (cmd *MkfileCmd) Mkfile() {
 					// ESCRIBO EL INODO NUEVO
 					read.WriteInodes(file, (globals.ByteToInt(super_bloque.Inode_start[:]) + (free_inode * int(unsafe.Sizeof(newInode)))), newInode)
 					read.WriteInodes(file, (globals.ByteToInt(super_bloque.Inode_start[:]) + (index_temp_inode * int(unsafe.Sizeof(temp_inode)))), temp_inode)
+					// ESCRIBO EL BLOQUE
+					read.WriteFileBlocks(file, globals.ByteToInt(super_bloque.Block_start[:])+(free_block*int(unsafe.Sizeof(real_block))), real_block)
 
 					// REESCRIBO EL SUPERBLOQUE
 					read.WriteSuperBlock(file, partition_m.Start, super_bloque)
@@ -374,7 +377,7 @@ func (cmd *MkfileCmd) Mkfile() {
 				temp_inode.Block[block_index] = int32(free_block_index)
 				number := 0
 				for caracter_index := 0; caracter_index < 64; caracter_index++ {
-					bloqueArchivo.Content[caracter_index] = byte(number)
+					bloqueArchivo.Content[caracter_index] = byte(number + 48)
 					// SI ES IGUAL A 9 VUELVE A 0 Y SI NO AUMENTA
 					if number == 9 {
 						number = 0
@@ -403,12 +406,26 @@ func (cmd *MkfileCmd) Mkfile() {
 
 				// ESCRIBO EL BLOQUE DE ARCHIVO EN EL DISCO
 				read.WriteArchiveBlocks(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (free_block_index * int(unsafe.Sizeof(bloqueArchivo)))), bloqueArchivo)
-
+				//ver := globals.ArchiveBlock{}
+				//ver = read.ReadArchiveBlock(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (free_block_index * int(unsafe.Sizeof(bloqueArchivo)))))
+				//fmt.Println(ver.Content, (globals.ByteToInt(super_bloque.Block_start[:]) + (free_block_index * int(unsafe.Sizeof(bloqueArchivo)))))
 				// REESCRIBO EL BITMAP DE BLOQUES
 				read.WriteBitmap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), bitblocks)
 			}
 
 		}
+
+		/*ver := globals.InodeTable{}
+
+		for i := 0; i < len(bitinodes); i++ {
+			if bitinodes[i] != '0' {
+				fmt.Println("--------------")
+				ver = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(i*int(unsafe.Sizeof(ver))))
+				fmt.Println(globals.ByteToString(ver.Atime[:]))
+				fmt.Println(globals.ByteToString(ver.Mtime[:]))
+				fmt.Println(globals.ByteToString(ver.Ctime[:]))
+			}
+		}*/
 
 		file.Close()
 

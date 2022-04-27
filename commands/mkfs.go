@@ -87,8 +87,8 @@ func (cmd *MkfsCmd) Mkfs() {
 		copy(super_bloque.Bm_inode_start[:], []byte(strconv.Itoa((mounted.Start + int(unsafe.Sizeof(super_bloque))))))
 		copy(super_bloque.Filesystem_type[:], []byte(strconv.Itoa(2)))
 		copy(super_bloque.Bm_block_start[:], []byte(strconv.Itoa(globals.ByteToInt(super_bloque.Bm_inode_start[:])+n)))
-		copy(super_bloque.Inode_start[:], []byte(strconv.Itoa(((mounted.Start + int(unsafe.Sizeof(super_bloque)) + n) + (3 * n)))))
-		copy(super_bloque.Block_start[:], []byte(strconv.Itoa((((mounted.Start + int(unsafe.Sizeof(super_bloque)) + n) + (3 * n)) + (n + int(unsafe.Sizeof(inode)))))))
+		copy(super_bloque.Inode_start[:], []byte(strconv.Itoa(globals.ByteToInt(super_bloque.Bm_block_start[:])+(3*n))))
+		copy(super_bloque.Block_start[:], []byte(strconv.Itoa(globals.ByteToInt(super_bloque.Inode_start[:])+(n*int(unsafe.Sizeof(inode))))))
 		copy(super_bloque.Mnt_count[:], []byte(globals.GetDate()))
 
 		// ESCRIBO EL SUPERBLOQUE EN EL DISCO

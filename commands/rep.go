@@ -2,14 +2,20 @@ package commands
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"unsafe"
 
 	"github.com/PR2_MIA/globals"
 	"github.com/PR2_MIA/read"
 )
+
+func createPortTd(content string, port string) string {
+	return "<td port=\"" + port + "\">" + content + "</td>"
+}
 
 type RepCmd struct {
 	Name string
@@ -45,7 +51,7 @@ func (cmd *RepCmd) Rep() {
 	}
 
 	// OBTENGO EL NOMBRE DEL REPORTE A GENERAR
-	report_name := cmd.Path[strings.LastIndex(cmd.Path, "/")+1 : len(cmd.Path)]
+	report_name := cmd.Path[:strings.LastIndex(cmd.Path, ".")+1]
 
 	// OBTENGO LA PARTICION MONTADA
 	partition_m := globals.GlobalList.GetElement(cmd.Id)
@@ -69,7 +75,7 @@ func (cmd *RepCmd) Rep() {
 	var bitinodes = make([]byte, globals.ByteToInt(super_bloque.Inodes_count[:]))
 	var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
 	bitinodes = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitinodes))
-	bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitblocks))
+	bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))
 
 	if cmd.Name == "disk" {
 		var porcentage float64 = 0
@@ -184,7 +190,129 @@ func (cmd *RepCmd) Rep() {
 		logicas += "</TR>\n"
 		dotContent += all_partitions + logicas + "</TABLE>>];\n}"
 
-		fmt.Println(dotContent)
-		fmt.Println(report_name)
+		// CREO Y ESCRIBO EL ARCHIVO .dot
+		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// GRAFICO EL ARCHIVO .dot CREADO
+		globals.GraphDot(report_name+"dot", cmd.Path)
+	} else if cmd.Name == "tree" {
+		// VARIABLE PARA RECORRER INODOS
+		temp_inode := globals.InodeTable{}
+
+		// VARIABLE PARA MOSTRAR TODOS LOS TIPOS DE BLOQUES
+		file_block := globals.FileBlock{}
+		archive_block := globals.ArchiveBlock{}
+
+		nodes := ""
+		blocks := ""
+		edges := ""
+
+		dotContent := "digraph {\ngraph [pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"];\nnode [shape=plain]\nrankdir=LR;"
+
+		// RECORRO INODOS
+		for i := 0; i < len(bitinodes); i++ {
+			// SI NO ES UN INODO LIBRE
+			if bitinodes[i] != '0' {
+
+				// LEO EL INODO
+				temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(i*int(unsafe.Sizeof(temp_inode))))
+				//fmt.Println(globals.ByteToInt(super_bloque.Inode_start[:]) + (i * int(unsafe.Sizeof(temp_inode))))
+
+				nodes += "inode" + strconv.Itoa(i) + " [label=< \n <table border=\"0\" cellborder=\"1\" cellspacing=\"0\"> \n"
+				nodes += "<tr><td bgcolor=\"#01f5ab\">INODE</td><td bgcolor=\"#01f5ab\">" + strconv.Itoa(i) + "</td></tr>\n"
+				nodes += "<tr>"
+				nodes += createPortTd("UID", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Uid[:]), "")
+				nodes += "</tr>\n"
+				nodes += "<tr>"
+				nodes += createPortTd("GID", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Gid[:]), "")
+				nodes += "</tr>\n"
+
+				nodes += "<tr>"
+				nodes += createPortTd("SIZE", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Size[:]), "")
+				nodes += "</tr>\n"
+				nodes += "<tr>"
+				nodes += createPortTd("LECTURA", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Atime[:]), "")
+				nodes += "</tr>\n"
+				nodes += "<tr>"
+				nodes += createPortTd("CREACION", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Ctime[:]), "")
+				nodes += "</tr>\n"
+				nodes += "<tr>"
+				nodes += createPortTd("MODIFICACION", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Mtime[:]), "")
+				nodes += "</tr>\n"
+
+				for block_index := 0; block_index < 14; block_index++ {
+					nodes += "<tr>"
+					nodes += createPortTd("AP"+strconv.Itoa(block_index), "")
+					nodes += createPortTd(strconv.Itoa(int(temp_inode.Block[block_index])), "i"+strconv.Itoa(i)+"b"+strconv.Itoa(int(temp_inode.Block[block_index])))
+					nodes += "</tr>\n"
+
+					if temp_inode.Block[block_index] != -1 {
+						edges += "inode" + strconv.Itoa(i) + ":i" + strconv.Itoa(i) + "b" + strconv.Itoa(int(temp_inode.Block[block_index])) + "->" + "block" + strconv.Itoa(int(temp_inode.Block[block_index])) + ";\n"
+						// SI ES UN INODO DE ARCHIVO
+						if globals.ByteToString(temp_inode.Type[:]) == "1" {
+							archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(temp_inode.Block[block_index])*int(unsafe.Sizeof(archive_block))))
+
+							// ENCABEZADO DEL BLOQUE
+							blocks += "block" + strconv.Itoa(int(temp_inode.Block[block_index])) + " [label=< \n <table border=\"0\" cellborder=\"1\" cellspacing=\"0\"> \n"
+							blocks += "<tr><td bgcolor=\"#f6ec1e\">BLOCK</td><td bgcolor=\"#f6ec1e\">" + strconv.Itoa(int(temp_inode.Block[block_index])) + "</td></tr>\n"
+							// ENCABEZADO EL CONTENIDO
+							block_content := ""
+							for con := 0; con < 64; con++ {
+								block_content += string(archive_block.Content[con])
+							}
+							blocks += "<tr><td colspan=\"2\">" + block_content + "</td></tr>\n"
+							// CIERRO LA TABLA
+							blocks += "</table>>]; \n"
+						} else if globals.ByteToString(temp_inode.Type[:]) == "0" {
+							file_block = read.ReadFileBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(temp_inode.Block[block_index])*int(unsafe.Sizeof(file_block))))
+							// ENCABEZADO DEL BLOQUE
+							blocks += "block" + strconv.Itoa(int(temp_inode.Block[block_index])) + " [label=< \n <table border=\"0\" cellborder=\"1\" cellspacing=\"0\"> \n"
+							blocks += "<tr><td bgcolor=\"#f61e73\">BLOCK</td><td bgcolor=\"#f61e73\">" + strconv.Itoa(int(temp_inode.Block[block_index])) + "</td></tr>\n"
+
+							for content := 0; content < 4; content++ {
+								blocks += "<tr>" + createPortTd(globals.ByteToString(file_block.Content[content].Name[:]), "") + createPortTd(strconv.Itoa(int(file_block.Content[content].Inodo)), "b"+strconv.Itoa(int(temp_inode.Block[block_index]))+"i"+strconv.Itoa(int(file_block.Content[content].Inodo))) + "</tr>\n"
+								if file_block.Content[content].Inodo != -1 && globals.ByteToString(file_block.Content[content].Name[:]) != "." && globals.ByteToString(file_block.Content[content].Name[:]) != ".." {
+									edges += "block" + strconv.Itoa(int(temp_inode.Block[block_index])) + ":b" + strconv.Itoa(int(temp_inode.Block[block_index])) + "i" + strconv.Itoa(int(file_block.Content[content].Inodo)) + "->" + "inode" + strconv.Itoa(int(file_block.Content[content].Inodo)) + ";\n"
+								}
+							}
+							blocks += "</table>>]; \n"
+						}
+					}
+				}
+				nodes += "<tr>"
+				nodes += createPortTd("TIPO", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Type[:]), "")
+				nodes += "</tr>\n"
+
+				nodes += "<tr>"
+				nodes += createPortTd("PERMISOS", "")
+				nodes += createPortTd(globals.ByteToString(temp_inode.Perm[:]), "")
+				nodes += "</tr>\n"
+
+				nodes += "</table>>]; \n"
+			}
+		}
+		dotContent += nodes
+		dotContent += blocks
+		dotContent += edges
+		dotContent += "\n}"
+
+		//fmt.Println(dotContent)
+
+		// CREO Y ESCRIBO EL ARCHIVO .dot
+		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// GRAFICO EL ARCHIVO .dot CREADO
+		globals.GraphDot(report_name+"dot", cmd.Path)
 	}
 }

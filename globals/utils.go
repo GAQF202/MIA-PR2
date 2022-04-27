@@ -7,7 +7,9 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -96,4 +98,14 @@ func ReadFile(file_name string) string {
 	datosComoString := string(datosComoBytes)
 
 	return datosComoString
+}
+
+func GraphDot(dot_path string, report_path string) {
+	// OBTENGO LA EXTENSION
+	extension := report_path[strings.LastIndex(report_path, ".")+1:]
+	// CREA GRAFICA A TRAVES DE COMANDOS EN CONSOLA
+	ver, _ := exec.LookPath("dot")
+	cmd, _ := exec.Command(ver, "-T"+extension, dot_path).Output()
+	mode := int(0777)
+	ioutil.WriteFile(report_path, cmd, os.FileMode(mode))
 }

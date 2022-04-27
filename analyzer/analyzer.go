@@ -54,165 +54,200 @@ func AnalyzerF() []globals.Command {
 
 	for i, character := range input {
 		letter := string(character)
+		// BANDERA PARA SABER CUANDO INICIA UN COMENTARIO
+		if letter == "#" {
+			tree = append(tree, tempCommand)
+			tempCommand = newCommand("comment")
+			isComment = true
+		}
 
-		if !findValue {
-			if letter != " " && letter != "\n" {
-				tempWord += letter
-				// COMANDOS PARA DISCOS
-				if tempWord == "mkdisk" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "rmdisk" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "fdisk" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "mount" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "mkfs" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-					// COMANDOS PARA SISTEMAS DE ARCHIVOS
-				} else if tempWord == "mkdir" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "mkfile" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-				} else if tempWord == "rep" {
-					tree = append(tree, tempCommand)
-					tempCommand = newCommand(tempWord)
-					tempWord = ""
-					// PARAMETROS
-				} else if tempWord == "-size=" {
-					tempPar = newParameter("size", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = true
-				} else if tempWord == "-fit=" {
-					tempPar = newParameter("fit", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-unit=" {
-					tempPar = newParameter("unit", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-path=" {
-					tempPar = newParameter("path", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-ruta=" {
-					tempPar = newParameter("ruta", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-type=" {
-					tempPar = newParameter("type", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-name=" {
-					tempPar = newParameter("name", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-id=" {
-					tempPar = newParameter("id", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-				} else if tempWord == "-cont=" {
-					tempPar = newParameter("cont", "", -1)
-					tempWord = ""
-					findValue = true
-					isIntValue = false
-					// PARAMETROS DE UNA SOLA LETRA
-				} else if tempWord == "-p" {
-					// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
-					if i == (len(input) - 1) {
-						tempPar = newParameter("-p", "-p", -1)
-						tempWord = ""
-						tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
-						// GUARDO COMANDO EN EL ARBOL DE COMANDOS
+		if !isComment {
+			if !findValue {
+				if letter != " " && letter != "\n" {
+					tempWord += letter
+					// COMANDOS PARA DISCOS
+					if tempWord == "mkdisk" {
 						tree = append(tree, tempCommand)
-					} else {
-						// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
-						if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" {
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "rmdisk" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "fdisk" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "mount" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "mkfs" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+						// COMANDOS PARA SISTEMAS DE ARCHIVOS
+					} else if tempWord == "mkdir" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "mkfile" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "rep" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+						// PARAMETROS
+					} else if tempWord == "-size=" {
+						tempPar = newParameter("size", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = true
+					} else if tempWord == "-fit=" {
+						tempPar = newParameter("fit", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-unit=" {
+						tempPar = newParameter("unit", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-path=" {
+						tempPar = newParameter("path", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-ruta=" {
+						tempPar = newParameter("ruta", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-type=" {
+						tempPar = newParameter("type", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-name=" {
+						tempPar = newParameter("name", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-id=" {
+						tempPar = newParameter("id", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-cont=" {
+						tempPar = newParameter("cont", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+						// PARAMETROS DE UNA SOLA LETRA
+					} else if tempWord == "-p" {
+						// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
+						if i == (len(input) - 1) {
 							tempPar = newParameter("-p", "-p", -1)
 							tempWord = ""
 							tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
-							// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+							// GUARDO COMANDO EN EL ARBOL DE COMANDOS
+							tree = append(tree, tempCommand)
 						} else {
-							continue
+							// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
+							if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" || string(input[i+1]) == "#" {
+								tempPar = newParameter("-p", "-p", -1)
+								tempWord = ""
+								tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+								// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+							} else {
+								continue
+							}
 						}
-					}
-				} else if tempWord == "-r" {
-					// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
-					if i == (len(input) - 1) {
-						tempPar = newParameter("-r", "-r", -1)
-						tempWord = ""
-						tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
-						// GUARDO COMANDO EN EL ARBOL DE COMANDOS
-						tree = append(tree, tempCommand)
-					} else {
-						// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
-						if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" {
+					} else if tempWord == "-r" {
+						// SI LLEGO AL FINAL DE LA CADENA ENTONCES GUARDA EL PARAMETRO Y EL COMANDO
+						if i == (len(input) - 1) {
 							tempPar = newParameter("-r", "-r", -1)
 							tempWord = ""
 							tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
-							// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+							// GUARDO COMANDO EN EL ARBOL DE COMANDOS
+							tree = append(tree, tempCommand)
 						} else {
-							continue
+							// SI EL SIGUIENTE ES UN ESPACIO O UN "-" GUARDA EL PARAMETRO
+							if string(input[i+1]) == " " || string(input[i+1]) == "-" || string(input[i+1]) == "\n" || string(input[i+1]) == "#" {
+								tempPar = newParameter("-r", "-r", -1)
+								tempWord = ""
+								tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
+								// SI NO ES UN CARACTER DE SEPARACION CONTINUA ANALIZANDO
+							} else {
+								continue
+							}
 						}
 					}
-				} else if tempWord == "#" {
-					tempPar = newParameter("comment", "", -1)
+				}
+				// SI ES UN COMENTARIO
+				/*} else if isComment {
+					tempWord += letter
+					fmt.Println(tempWord)
+					if letter == "\n" {
+						fmt.Println("Entraa")
+						fmt.Println(tempWord)
+						tempWord = ""
+						isComment = false
+						findValue = false
+					}
+					// SI NO ES COMANDO NI COMENTARIO ES VALOR DE UN PARAMETRO
+				} */
+			} else {
+				tempWord += letter
+				if letter == " " && !valueFound {
+					continue
+				} else {
+					valueFound = true
+				}
+				// SI ENCUENTRA UN ESPACIO QUIERE DECIR SIGUE BUSCANDO COMANDOS
+				if (letter == " " || i == (len(input)-1) || letter == "\n") && valueFound {
+					if isIntValue {
+						convertedValue, _ := strconv.Atoi(strings.TrimSpace(tempWord))
+						tempIntValue = convertedValue
+					} else {
+						// DEVUELVE EL STRING SIN SALTOS
+						tempStringValue = strings.TrimSuffix(strings.TrimSpace(tempWord), "\n")
+					}
+					tempPar.IntValue = tempIntValue
+					tempPar.StringValue = tempStringValue
+					tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
 					tempWord = ""
-					isComment = true
+					tempStringValue = ""
+					tempIntValue = -1
+					findValue = false
+					valueFound = false // REGRESO BANDERA DE CARACTER DIFERENTE DE " "
+
+					if i == (len(input) - 1) {
+						tree = append(tree, tempCommand)
+					}
 				}
 			}
-		} else if isComment {
-
 		} else {
 			tempWord += letter
-			if letter == " " && !valueFound {
-				continue
-			} else {
-				valueFound = true
-			}
-			// SI ENCUENTRA UN ESPACIO QUIERE DECIR SIGUE BUSCANDO COMANDOS
-			if (letter == " " || i == (len(input)-1) || letter == "\n") && valueFound {
-				if isIntValue {
-					convertedValue, _ := strconv.Atoi(strings.TrimSpace(tempWord))
-					tempIntValue = convertedValue
-				} else {
-					// DEVUELVE EL STRING SIN SALTOS
-					tempStringValue = strings.TrimSuffix(strings.TrimSpace(tempWord), "\n")
-				}
-				tempPar.IntValue = tempIntValue
-				tempPar.StringValue = tempStringValue
+			// MIENTRAS EL CARACTER DE LA CADENA NO SEA UN SALTO
+			// O NO SE HAYA LLEGADO AL FINAL DE LA CADENA SE SIGUE CONCATENDANDO
+			if letter == "\n" || i == (len(input)-1) {
+				tempPar = newParameter("value", strings.TrimSpace(tempWord), -1)
 				tempCommand.Parameters = append(tempCommand.Parameters, tempPar)
 				tempWord = ""
-				tempStringValue = ""
-				tempIntValue = -1
-				findValue = false
-				valueFound = false // REGRESO BANDERA DE CARACTER DIFERENTE DE " "
+				isComment = false
+				// SI LLEGA AL FINAL GUARDA EL COMANDO EN EL ARBOL DE COMANDOS
 				if i == (len(input) - 1) {
 					tree = append(tree, tempCommand)
 				}
 			}
+		}
+
+		// SI LLEGA AL FINAL ALMACENA EL ULTIMO COMANDO AL ARBOLITO
+		if i == (len(input) - 1) {
+			tree = append(tree, tempCommand)
 		}
 	}
 

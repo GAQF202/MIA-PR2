@@ -51,6 +51,10 @@ func main() {
 			rep := commands.RepCmd{}
 			rep.AssignParameters(element)
 			rep.Rep()
+		} else if element.Name == "comment" {
+			comment := commands.Comment{}
+			comment.AssignParameters(element)
+			comment.ShowComment()
 		}
 	}
 }

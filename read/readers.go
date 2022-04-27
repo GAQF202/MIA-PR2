@@ -71,6 +71,21 @@ func ReadFileBlock(file *os.File, position int) globals.FileBlock {
 }
 
 // FUNCION PARA LEER INODOS DEL DISCO EN LA PARTICION
+func ReadArchiveBlock(file *os.File, position int) globals.ArchiveBlock {
+	var block = globals.ArchiveBlock{}
+
+	size := int(unsafe.Sizeof(block))
+	file.Seek(int64(position), 0)
+	data := globals.ReadBytes(file, size)
+	buffer := bytes.NewBuffer(data)
+	err1 := binary.Read(buffer, binary.BigEndian, &block)
+	if err1 != nil {
+		log.Fatal("Error ", err1)
+	}
+	return block
+}
+
+// FUNCION PARA LEER INODOS DEL DISCO EN LA PARTICION
 func ReadFileMbr(file *os.File, position int) globals.MBR {
 	var mbr = globals.MBR{}
 
