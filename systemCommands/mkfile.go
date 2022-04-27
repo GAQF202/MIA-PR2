@@ -91,11 +91,14 @@ func (cmd *MkfileCmd) Mkfile() {
 
 		temp_inode := globals.InodeTable{}
 		var index_temp_inode int
+		catch_inode_index := 0
 		//LEO EL PRIMER INODO
 		temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:]))
 
 		// VECTOR PARA GUARDAR LAS RUTAS QUE FALTAN POR CREARSE
-		var remaining_routes = routes
+		var remaining_routes = make([]string, len(routes))
+		// CREO UNA COPIA PARA QUE NO SE ALTERE EL ROUTE
+		copy(remaining_routes, routes)
 
 		// RECORRE LA RUTA
 		for path_index := 0; path_index < len(routes); path_index++ {
@@ -122,6 +125,8 @@ func (cmd *MkfileCmd) Mkfile() {
 								index_temp_inode = int(file_block.Content[blockIndex].Inodo)
 								exist_route = true
 								exist_path = true
+								// ATRAPA EL ULTIMO NUMBERO DE INODO QUE SE CREO
+								catch_inode_index = int(file_block.Content[blockIndex].Inodo)
 							}
 						}
 					}
@@ -133,6 +138,8 @@ func (cmd *MkfileCmd) Mkfile() {
 		}
 		//VERIFICACION DE EXISTENCIA DE RUTAS
 		if !exist_route {
+			// IGUALO EL index_temp_inode AL INDICE DE LA ULTIMA RUTA ENCONTRADA
+			index_temp_inode = catch_inode_index
 			//fmt.Println("Entraa", remaining_routes)
 			// CREA LAS RUTAS FALTANTES
 			if cmd.R != "" {
