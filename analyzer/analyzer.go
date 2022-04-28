@@ -108,6 +108,14 @@ func AnalyzerF() []globals.Command {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
+					} else if tempWord == "mkgrp" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "mkuser" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
 						// PARAMETROS
 					} else if tempWord == "-size=" {
 						tempPar = newParameter("size", "", -1)
@@ -161,6 +169,16 @@ func AnalyzerF() []globals.Command {
 						isIntValue = false
 					} else if tempWord == "-password=" {
 						tempPar = newParameter("password", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-pwd=" {
+						tempPar = newParameter("pwd", "", -1)
+						tempWord = ""
+						findValue = true
+						isIntValue = false
+					} else if tempWord == "-grp=" {
+						tempPar = newParameter("grp", "", -1)
 						tempWord = ""
 						findValue = true
 						isIntValue = false

@@ -258,6 +258,7 @@ func (cmd *RepCmd) Rep() {
 						edges += "inode" + strconv.Itoa(i) + ":i" + strconv.Itoa(i) + "b" + strconv.Itoa(int(temp_inode.Block[block_index])) + "->" + "block" + strconv.Itoa(int(temp_inode.Block[block_index])) + ";\n"
 						// SI ES UN INODO DE ARCHIVO
 						if globals.ByteToString(temp_inode.Type[:]) == "1" {
+
 							archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(temp_inode.Block[block_index])*int(unsafe.Sizeof(archive_block))))
 
 							// ENCABEZADO DEL BLOQUE
@@ -268,6 +269,8 @@ func (cmd *RepCmd) Rep() {
 							for con := 0; con < 64; con++ {
 								block_content += string(archive_block.Content[con])
 							}
+							// LIMPIO MI STRING DE BYTES
+							block_content = strings.TrimRight(block_content, "\x00")
 							blocks += "<tr><td colspan=\"2\">" + block_content + "</td></tr>\n"
 							// CIERRO LA TABLA
 							blocks += "</table>>]; \n"

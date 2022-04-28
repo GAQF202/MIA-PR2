@@ -29,17 +29,19 @@ mkfs -id=571A -type=fast
 login -usuario=root -password=123 -id=571A
 Mkdir -P  -path=/home/archivos/mia/fase2
 Mkdir -P  -path=/home/archivos/mia/carpeta2
-logout
-login -usuario=root -password=123 -id=571A
+Mkgrp -name=hello
+Mkuser -usuario=user1 -pwd=maincra -grp=root
+Mkuser -usuario=user2 -pwd=maincra -grp=root
+Mkuser -usuario=user3 -pwd=maincra -grp=root
 Mkdir -P  -path=/home/archivos/mia/z
-#Mkdir -P  -path=/home/archivos/mia/carpeta3/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
-#Mkdir -P  -path=/home/archivos/mia/carpeta4/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
-#Mkdir  -path=/home/archivos/mia/carpeta2/a1
-#Mkdir  -path=/home/archivos/mia/carpeta2/a2
-#Mkdir  -path=/home/archivos/mia/carpeta2/a3
-#Mkdir  -path=/home/archivos/mia/carpeta2/a4
-#Mkdir  -path=/home/archivos/mia/carpeta2/a5
-#Mkdir  -path=/home/archivos/mia/carpeta2/a6
+Mkdir -P  -path=/home/archivos/mia/carpeta3/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
+Mkdir -P  -path=/home/archivos/mia/carpeta4/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
+Mkdir  -path=/home/archivos/mia/carpeta2/a1
+Mkdir  -path=/home/archivos/mia/carpeta2/a2
+Mkdir  -path=/home/archivos/mia/carpeta2/a3
+Mkdir  -path=/home/archivos/mia/carpeta2/a4
+Mkdir  -path=/home/archivos/mia/carpeta2/a5
+Mkdir  -path=/home/archivos/mia/carpeta2/a6
 #Mkdir  -path=/home/archivos/mia/carpeta2/a7
 #Mkdir  -path=/home/archivos/mia/carpeta2/a8
 #Mkdir  -path=/home/archivos/mia/carpeta2/a9
@@ -101,3 +103,5 @@ Mkdir -P  -path=/home/archivos/mia/z
 rep -id=571A -name=disk -path=/hola/myReports/hello.svg
 
 rep -id=571A -name=tree -path=/hola/myReports/hello.svg
+
+logout

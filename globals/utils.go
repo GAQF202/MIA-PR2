@@ -109,3 +109,24 @@ func GraphDot(dot_path string, report_path string) {
 	mode := int(0777)
 	ioutil.WriteFile(report_path, cmd, os.FileMode(mode))
 }
+
+// FUNCION PARA DETERMINAR LA CANTIDAD DE BLOQUES A USAR DEPENDIENDO
+// DEL TAMANIO DE UNA CADENA
+func GetBlocksNumber(size int) int {
+
+	var number_blocks int
+	if size > 64 {
+		number_blocks = (size / 64)
+	} else {
+		number_blocks = 1
+	}
+
+	if size == 0 {
+		number_blocks = 0
+	}
+
+	if ((size % 64) != 0) && (size > 64) {
+		number_blocks++
+	}
+	return number_blocks
+}

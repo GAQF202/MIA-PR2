@@ -62,6 +62,14 @@ func main() {
 			login.Login()
 		} else if element.Name == "logout" {
 			users.Logout()
+		} else if element.Name == "mkgrp" {
+			mkgrp := users.MkgrpCmd{}
+			mkgrp.AssignParameters(element)
+			mkgrp.Mkgrp()
+		} else if element.Name == "mkuser" {
+			mkuser := users.MkuserCmd{}
+			mkuser.AssignParameters(element)
+			mkuser.Mkuser()
 		}
 	}
 }
