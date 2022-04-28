@@ -72,8 +72,8 @@ func (cmd *MkuserCmd) Mkuser() {
 				for block_i := 0; block_i < 16; block_i++ {
 					if users_inode.Block[block_i] != -1 {
 						archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(users_inode.Block[block_i])*int(unsafe.Sizeof(archive_block))))
-						users_archive_content += globals.ByteToString(archive_block.Content[:])
-						//actual_block_index = block_i
+						// CONCATENO QUITANDO EL SALTO DE LINEA DERECHO PARA QUE NO DE ERROR
+						users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "\n")
 					}
 				}
 
@@ -122,7 +122,7 @@ func (cmd *MkuserCmd) Mkuser() {
 					// QUITO DEL STRING TODOS LOS SALTOS DE LINEA A LA DERECHA
 					users_archive_content = strings.TrimRight(users_archive_content, "\n")
 					// AGREGO EL NUEVO GRUPO AL STRING DEL CONTENIDO DE USUARIOS
-					users_archive_content += "\n" + strconv.Itoa(len(users)+1) + "," + "U," + cmd.Grp + "," + cmd.Usuario + "," + cmd.Pwd + "\n"
+					users_archive_content += "\n" + strconv.Itoa(len(users)+1) + "," + "U," + cmd.Grp + "," + cmd.Usuario + "," + cmd.Pwd
 					// LEO BITMAP DE BLOQUES
 					var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
 					bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))

@@ -65,7 +65,8 @@ func (cmd *MkgrpCmd) Mkgrp() {
 		for block_i := 0; block_i < 16; block_i++ {
 			if users_inode.Block[block_i] != -1 {
 				archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(users_inode.Block[block_i])*int(unsafe.Sizeof(archive_block))))
-				users_archive_content += globals.ByteToString(archive_block.Content[:])
+				// CONCATENO QUITANDO EL SALTO DE LINEA DERECHO PARA QUE NO DE ERROR
+				users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "\n")
 				//actual_block_index = block_i
 			}
 		}
