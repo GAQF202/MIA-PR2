@@ -27,6 +27,9 @@ mkfs -id=571A -type=fast
 #Mkdir -P  -path=/maincra
 #Mkfile -R -path=/maincra.txt -size=300
 login -usuario=root -password=123 -id=571A
+mkfile -path=/b1.txt -size=75
+Mkdir -P -path=/yea
+Mkdir -P -path=/home
 Mkdir -P  -path=/home/archivos/mia/fase2
 Mkdir -P  -path=/home/archivos/mia/carpeta2
 Mkgrp -name=hello
@@ -42,11 +45,11 @@ Mkdir  -path=/home/archivos/mia/carpeta2/a3
 Mkdir  -path=/home/archivos/mia/carpeta2/a4
 Mkdir  -path=/home/archivos/mia/carpeta2/a5
 Mkdir  -path=/home/archivos/mia/carpeta2/a6
-#Mkdir  -path=/home/archivos/mia/carpeta2/a7
-#Mkdir  -path=/home/archivos/mia/carpeta2/a8
-#Mkdir  -path=/home/archivos/mia/carpeta2/a9
-#Mkdir  -path=/home/archivos/mia/carpeta2/a10
-#Mkdir  -path=/home/archivos/mia/fase2/a1
+Mkdir  -path=/home/archivos/mia/carpeta2/a7
+Mkdir  -path=/home/archivos/mia/carpeta2/a8
+Mkdir  -path=/home/archivos/mia/carpeta2/a9
+Mkdir  -path=/home/archivos/mia/carpeta2/a10
+Mkdir  -path=/home/archivos/mia/fase2/a1
 #Mkdir  -path=/home/archivos/mia/fase2/a2
 #Mkdir  -path=/home/archivos/mia/fase2/a3
 #Mkdir  -path=/home/archivos/mia/fase2/a4

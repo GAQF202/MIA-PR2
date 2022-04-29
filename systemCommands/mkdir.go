@@ -99,7 +99,7 @@ func (cmd *MkdirCmd) Mkdir() {
 		copy(block.Content[0].Name[:], []byte("."))
 		copy(block.Content[1].Name[:], []byte(".."))
 		block.Content[0].Inodo = 0
-		block.Content[1].Inodo = 1
+		block.Content[1].Inodo = 0
 
 		// MODIFICO LOS BITMAPS
 		bitinodes[0] = '1'
@@ -134,6 +134,9 @@ func (cmd *MkdirCmd) Mkdir() {
 		// CREO UNA COPIA PARA QUE NO SE ALTERE EL ROUTE
 		copy(remaining_routes, routes)
 
+		var ver = make([]int, 1)
+		ver[0] = 0
+
 		// RECORRE LA RUTA
 		for path_index := 0; path_index < len(routes); path_index++ {
 			exist_path := false
@@ -161,6 +164,8 @@ func (cmd *MkdirCmd) Mkdir() {
 								temp_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(int(file_block.Content[blockIndex].Inodo)*int(unsafe.Sizeof(temp_inode))))
 								//fmt.Println(globals.ByteToInt(super_bloque.Inode_start[:]) + (int(file_block.Content[blockIndex].Inodo) * int(unsafe.Sizeof(temp_inode))))
 								//index_temp_inode = int(file_block.Content[blockIndex].Inodo)
+								ver = append(ver, int(file_block.Content[blockIndex].Inodo))
+
 								exist_route = true
 								exist_path = true
 								// ATRAPA EL ULTIMO NUMBERO DE INODO QUE SE CREO
@@ -234,7 +239,7 @@ func (cmd *MkdirCmd) Mkdir() {
 							if pointer == 0 {
 								real_block.Content[0].Inodo = int32(index_temp_inode)
 								copy(real_block.Content[0].Name[:], []byte("."))
-								real_block.Content[1].Inodo = int32(index_temp_inode)
+								real_block.Content[1].Inodo = int32(ver[len(ver)-2])
 								copy(real_block.Content[1].Name[:], []byte(".."))
 								block_pointer = 2
 							}
@@ -294,6 +299,8 @@ func (cmd *MkdirCmd) Mkdir() {
 							// RECORRO EL ARBOL
 							temp_inode = newInode
 							index_temp_inode = free_inode
+							// VEEEER
+							ver = append(ver, free_inode)
 							break
 						}
 
@@ -347,6 +354,8 @@ func (cmd *MkdirCmd) Mkdir() {
 							// RECORRO EL ARBOL
 							temp_inode = newInode
 							index_temp_inode = free_inode
+							// VEEEER
+							ver = append(ver, free_inode)
 							break
 						} else {
 							continue
