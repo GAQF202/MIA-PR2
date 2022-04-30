@@ -229,6 +229,8 @@ func (cmd *FdiskCmd) Fdisk() {
 								copy(MBR.Partitions[i].Part_size[:], []byte(strconv.Itoa(cmd.Size*multiplicator)))
 								copy(MBR.Partitions[i].Part_start[:], []byte(strconv.Itoa(selectVoidSpace)))
 								copy(MBR.Partitions[i].Part_type[:], []byte(ptype))
+								// IMPRIMO EN CONSOLA LOS DATOS DE LA PARTICION CREADA
+								globals.PrintPartition(MBR.Partitions[i])
 								break
 							}
 						}
@@ -317,6 +319,8 @@ func (cmd *FdiskCmd) Fdisk() {
 						var bufferControl bytes.Buffer
 						binary.Write(&bufferControl, binary.BigEndian, &EBR)
 						globals.WriteBytes(file, bufferControl.Bytes())
+						// IMPRIMO LOS DATOS DEL EBR CREADO
+						globals.PrintEBR(EBR)
 					} else {
 						fmt.Println("Error: la particion " + cmd.Name + " no puede ser creada debido no existe particion extendida")
 						return

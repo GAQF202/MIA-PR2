@@ -70,6 +70,8 @@ func main() {
 			mkuser := users.MkuserCmd{}
 			mkuser.AssignParameters(element)
 			mkuser.Mkuser()
+		} else if element.Name == "pause" {
+			commands.Pause()
 		}
 	}
 }

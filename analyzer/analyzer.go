@@ -116,6 +116,10 @@ func AnalyzerF() []globals.Command {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
+					} else if tempWord == "pause" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
 						// PARAMETROS
 					} else if tempWord == "-size=" {
 						tempPar = newParameter("size", "", -1)

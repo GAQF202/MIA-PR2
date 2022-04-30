@@ -130,3 +130,24 @@ func GetBlocksNumber(size int) int {
 	}
 	return number_blocks
 }
+
+func PrintEBR(ebr EBR) {
+	fmt.Println("---------EBR CREADO-----------")
+	fmt.Println("Name: ", ByteToString(ebr.Part_name[:]))
+	fmt.Println("Fit: ", ByteToString(ebr.Part_fit[:]))
+	fmt.Println("Next: ", ByteToString(ebr.Part_next[:]))
+	fmt.Println("Size: ", ByteToString(ebr.Part_size[:]))
+	fmt.Println("Start: ", ByteToString(ebr.Part_start[:]))
+	fmt.Println("Status: ", ByteToString(ebr.Part_status[:]))
+	fmt.Println("------------------------------")
+}
+
+func PrintPartition(partition Partition) {
+	fmt.Println("---------PARTICION CREADA -----------")
+	fmt.Println("Name: ", ByteToString(partition.Part_name[:]))
+	fmt.Println("Fit: ", ByteToString(partition.Part_fit[:]))
+	fmt.Println("Size: ", ByteToString(partition.Part_size[:]))
+	fmt.Println("Start: ", ByteToString(partition.Part_start[:]))
+	fmt.Println("Status: ", ByteToString(partition.Part_status[:]))
+	fmt.Println("------------------------------")
+}

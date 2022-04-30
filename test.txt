@@ -6,6 +6,7 @@ mKdisk -size=3 -fit= BF -unit=m -path= /hola/gerson/ver/disk1.dk
 
 fdisk -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition 
 fdisk -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition1
+pause
 fdisk -type=p -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition2
 fdisk -type=e -path=/hola/gerson/ver/disk1.dk -size=90 -name=myPartition3
 fdisk -type=l -path=/hola/gerson/ver/disk1.dk -size=10 -name=logic1
