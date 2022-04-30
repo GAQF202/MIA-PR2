@@ -46,7 +46,8 @@ func (cmd *RepCmd) Rep() {
 
 	// CREA LAS CARPETAS PADRE
 	parent_path := cmd.Path[:strings.LastIndex(cmd.Path, "/")]
-	if err := os.MkdirAll(parent_path, 0700); err != nil {
+
+	if err := os.MkdirAll(parent_path, 0777); err != nil {
 		log.Fatal(err)
 	}
 
@@ -55,6 +56,10 @@ func (cmd *RepCmd) Rep() {
 
 	// OBTENGO LA PARTICION MONTADA
 	partition_m := globals.GlobalList.GetElement(cmd.Id)
+	if partition_m.Path == "" {
+		fmt.Println("Error: No se puede generar reporte con la particion " + cmd.Id + " ya que no se encuentra montada en RAM")
+		return
+	}
 	// ABRO EL ARCHIVO
 	file, err := os.OpenFile(partition_m.Path, os.O_RDWR, 0777)
 	// VERIFICACION DE ERROR AL ABRIR EL ARCHIVO
@@ -89,97 +94,99 @@ func (cmd *RepCmd) Rep() {
 		avalaible_space := 0
 
 		for i := 0; i < 4; i++ {
-			if globals.ByteToString(mbr.Partitions[i].Part_type[:]) != "p" {
+			if globals.ByteToInt(mbr.Partitions[i].Part_size[:]) != -1 {
+				if globals.ByteToString(mbr.Partitions[i].Part_type[:]) != "p" {
 
-				colspan := 2
-				temp := globals.EBR{} // GUARDA EL TEMPORAL PARA RECORRER LA LISTA
+					colspan := 2
+					temp := globals.EBR{} // GUARDA EL TEMPORAL PARA RECORRER LA LISTA
 
-				// LEO LA PRIMERA PARTICION LOGICA A DONDE APUNTA LA EXTENDIDA Y ASIGNO A TEMP
-				temp = read.ReadEbr(file, globals.ByteToInt(mbr.Partitions[i].Part_start[:]))
-				// GRAFICA DE LOGICA
-				porcentage = float64(float64((globals.ByteToInt(temp.Part_size[:]))*100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-				logicas += "\n<TD COLOR=\"#87b8a4\">EBR</TD>\n"
-				logicas += "\n<TD COLOR=\"#87b8a4\"> Lógica <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-
-				// MIENTRAS NO LLEGUE AL FINAL DE LA LISTA
-				for globals.ByteToInt(temp.Part_next[:]) != -1 {
-					colspan += 2
-					temp = read.ReadEbr(file, globals.ByteToInt(temp.Part_next[:]))
+					// LEO LA PRIMERA PARTICION LOGICA A DONDE APUNTA LA EXTENDIDA Y ASIGNO A TEMP
+					temp = read.ReadEbr(file, globals.ByteToInt(mbr.Partitions[i].Part_start[:]))
 					// GRAFICA DE LOGICA
-					porcentage = float64((float64(globals.ByteToInt(temp.Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+					porcentage = float64(float64((globals.ByteToInt(temp.Part_size[:]))*100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
 					logicas += "\n<TD COLOR=\"#87b8a4\">EBR</TD>\n"
 					logicas += "\n<TD COLOR=\"#87b8a4\"> Lógica <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-				}
 
-				// MIENTRAS NO LLEGUE A LA ULTIMA PARTICION
-				if i != 3 {
-					// GRAFICA DE EXTENDIDA
-					porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-					all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Extendida <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+					// MIENTRAS NO LLEGUE AL FINAL DE LA LISTA
+					for globals.ByteToInt(temp.Part_next[:]) != -1 {
+						colspan += 2
+						temp = read.ReadEbr(file, globals.ByteToInt(temp.Part_next[:]))
+						// GRAFICA DE LOGICA
+						porcentage = float64((float64(globals.ByteToInt(temp.Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+						logicas += "\n<TD COLOR=\"#87b8a4\">EBR</TD>\n"
+						logicas += "\n<TD COLOR=\"#87b8a4\"> Lógica <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+					}
 
-					if globals.ByteToInt(mbr.Partitions[i+1].Part_size[:]) != -1 {
-						// CALCULO ESPACIO VACIO
-						avalaible_space = globals.ByteToInt(mbr.Partitions[i+1].Part_start[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
-						// CALCULO PORCENTAJE
-						porcentage = float64((float64(avalaible_space))*100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:]))
-						if porcentage > 0.8 {
-							all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-						}
-					}
-				} else {
-					// GRAFICA DE EXTENDIDA
-					porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-					all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Extendida <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-					//all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Extendida <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
-					// CALCULO ESPACIO VACIO
-					avalaible_space = globals.ByteToInt(mbr.Mbr_size[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
-					// CALCULO PORCENTAJE
-					porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-					if porcentage > 0.8 {
-						//all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Libre <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
-						all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-					}
-				}
-			} else {
-				// GRAFICO SOLO LAS PARTICIONES EXISTENTES
-				if globals.ByteToInt(mbr.Partitions[i].Part_size[:]) != -1 {
 					// MIENTRAS NO LLEGUE A LA ULTIMA PARTICION
 					if i != 3 {
-						// GRAFICA DE PRIMARIA
+						// GRAFICA DE EXTENDIDA
 						porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-
-						all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Primaria <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+						all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Extendida <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
 
 						if globals.ByteToInt(mbr.Partitions[i+1].Part_size[:]) != -1 {
 							// CALCULO ESPACIO VACIO
 							avalaible_space = globals.ByteToInt(mbr.Partitions[i+1].Part_start[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
 							// CALCULO PORCENTAJE
-							porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-
+							porcentage = float64((float64(avalaible_space))*100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:]))
 							if porcentage > 0.8 {
-								all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
-							}
-						} else {
-							// CALCULO ESPACIO VACIO
-							avalaible_space = globals.ByteToInt(mbr.Mbr_size[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
-							// CALCULO PORCENTAJE
-							porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-
-							if porcentage > 0.8 {
-								all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+								all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
 							}
 						}
 					} else {
-						// GRAFICA DE PRIMARIA
+						// GRAFICA DE EXTENDIDA
 						porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
-						all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Primaria <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+						all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Extendida <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+						//all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Extendida <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
 						// CALCULO ESPACIO VACIO
 						avalaible_space = globals.ByteToInt(mbr.Mbr_size[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
 						// CALCULO PORCENTAJE
-						porcentage = float64((avalaible_space * 100) / globals.ByteToInt(mbr.Mbr_size[:]))
-
+						porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
 						if porcentage > 0.8 {
-							all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
+							//all_partitions += "\n<TD COLOR=\"#75e400\" COLSPAN=\"" + strconv.Itoa(colspan) + "\"> Libre <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
+							all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+						}
+					}
+				} else {
+					// GRAFICO SOLO LAS PARTICIONES EXISTENTES
+					if globals.ByteToInt(mbr.Partitions[i].Part_size[:]) != -1 {
+						// MIENTRAS NO LLEGUE A LA ULTIMA PARTICION
+						if i != 3 {
+							// GRAFICA DE PRIMARIA
+							porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+
+							all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Primaria <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+
+							if globals.ByteToInt(mbr.Partitions[i+1].Part_size[:]) != -1 {
+								// CALCULO ESPACIO VACIO
+								avalaible_space = globals.ByteToInt(mbr.Partitions[i+1].Part_start[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
+								// CALCULO PORCENTAJE
+								porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+
+								if porcentage > 0.8 {
+									all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+								}
+							} else {
+								// CALCULO ESPACIO VACIO
+								avalaible_space = globals.ByteToInt(mbr.Mbr_size[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
+								// CALCULO PORCENTAJE
+								porcentage = float64((float64(avalaible_space) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+
+								if porcentage > 0.8 {
+									all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+								}
+							}
+						} else {
+							// GRAFICA DE PRIMARIA
+							porcentage = float64((float64(globals.ByteToInt(mbr.Partitions[i].Part_size[:])) * 100.0) / float64(globals.ByteToInt(mbr.Mbr_size[:])))
+							all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Primaria <BR/>" + fmt.Sprintf("%.2f", porcentage) + "%</TD>\n"
+							// CALCULO ESPACIO VACIO
+							avalaible_space = globals.ByteToInt(mbr.Mbr_size[:]) - (globals.ByteToInt(mbr.Partitions[i].Part_start[:]) + globals.ByteToInt(mbr.Partitions[i].Part_size[:]))
+							// CALCULO PORCENTAJE
+							porcentage = float64((avalaible_space * 100) / globals.ByteToInt(mbr.Mbr_size[:]))
+
+							if porcentage > 0.8 {
+								all_partitions += "\n<TD COLOR=\"#75e400\" ROWSPAN=\"3\"> Libre <BR/>" + fmt.Sprint(porcentage) + "%</TD>\n"
+							}
 						}
 					}
 				}
@@ -191,10 +198,11 @@ func (cmd *RepCmd) Rep() {
 		dotContent += all_partitions + logicas + "</TABLE>>];\n}"
 
 		// CREO Y ESCRIBO EL ARCHIVO .dot
-		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0644)
+		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0777)
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		// GRAFICO EL ARCHIVO .dot CREADO
 		globals.GraphDot(report_name+"dot", cmd.Path)
 	} else if cmd.Name == "tree" {
@@ -311,7 +319,7 @@ func (cmd *RepCmd) Rep() {
 		//fmt.Println(dotContent)
 
 		// CREO Y ESCRIBO EL ARCHIVO .dot
-		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0644)
+		err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0777)
 		if err != nil {
 			log.Fatal(err)
 		}

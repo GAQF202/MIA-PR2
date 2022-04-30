@@ -242,6 +242,8 @@ func (cmd *FdiskCmd) Fdisk() {
 						fit := ""
 						if cmd.Fit == "" {
 							fit = "wf"
+						} else {
+							fit = cmd.Fit
 						}
 						// EBR A ESCRIBIR
 						EBR := globals.EBR{}

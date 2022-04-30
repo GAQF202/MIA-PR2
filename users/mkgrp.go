@@ -113,6 +113,9 @@ func (cmd *MkgrpCmd) Mkgrp() {
 			block := globals.ArchiveBlock{} // BLOQUE ACTUAL
 			block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(users_inode.Block[block_index])*int(unsafe.Sizeof(block))))
 
+			// REDIMENSIONO EL ARCHIVO DE USUARIOS
+			copy(users_inode.Size[:], strconv.Itoa(len(users_archive_content)))
+
 			// RECORRO EL STRING CON LOS GRUPOS Y USARIOS
 			for len(users_archive_content) != 0 {
 

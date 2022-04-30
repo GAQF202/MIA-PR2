@@ -118,12 +118,14 @@ func (cmd *MountCmd) Mount() {
 					size_partition := globals.ByteToInt(primary_part.Part_size[:])
 					globals.GlobalList.MountPartition(disk_name, partition_name, partition_start, cmd.Path, type_partition, fit_partition, size_partition)
 				} else {
+					//fmt.Println(cmd.Name, globals.ByteToString(logic_part.Part_start[:]), globals.ByteToString(logic_part.Part_size[:]))
 					disk_name := cmd.Path[strings.LastIndex(cmd.Path, "/")+1 : len(cmd.Path)]
 					partition_name := globals.ByteToString(logic_part.Part_name[:])
 					partition_start := globals.ByteToInt(logic_part.Part_start[:])
-					type_partition := globals.ByteToString(primary_part.Part_type[:])
-					fit_partition := globals.ByteToString(primary_part.Part_fit[:])
-					size_partition := globals.ByteToInt(primary_part.Part_size[:])
+					//type_partition := globals.ByteToString(logic_part.Part_type[:])
+					type_partition := "l"
+					fit_partition := globals.ByteToString(logic_part.Part_fit[:])
+					size_partition := globals.ByteToInt(logic_part.Part_size[:])
 					globals.GlobalList.MountPartition(disk_name, partition_name, partition_start, cmd.Path, type_partition, fit_partition, size_partition)
 				}
 			} else {

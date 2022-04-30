@@ -149,5 +149,6 @@ func PrintPartition(partition Partition) {
 	fmt.Println("Size: ", ByteToString(partition.Part_size[:]))
 	fmt.Println("Start: ", ByteToString(partition.Part_start[:]))
 	fmt.Println("Status: ", ByteToString(partition.Part_status[:]))
+	fmt.Println("Type: ", ByteToString(partition.Part_type[:]))
 	fmt.Println("------------------------------")
 }
