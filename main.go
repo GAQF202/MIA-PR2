@@ -66,10 +66,18 @@ func main() {
 			mkgrp := users.MkgrpCmd{}
 			mkgrp.AssignParameters(element)
 			mkgrp.Mkgrp()
+		} else if element.Name == "rmgrp" {
+			rmgrp := users.RmgrpCmd{}
+			rmgrp.AssignParameters(element)
+			rmgrp.Rmgrp()
 		} else if element.Name == "mkuser" {
 			mkuser := users.MkuserCmd{}
 			mkuser.AssignParameters(element)
 			mkuser.Mkuser()
+		} else if element.Name == "rmusr" {
+			rmuser := users.RmusrCmd{}
+			rmuser.AssignParameters(element)
+			rmuser.Rmusr()
 		} else if element.Name == "pause" {
 			commands.Pause()
 		}

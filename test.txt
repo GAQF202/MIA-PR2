@@ -34,9 +34,18 @@ Mkdir -P -path=/home
 Mkdir -P  -path=/home/archivos/mia/fase2
 Mkdir -P  -path=/home/archivos/mia/carpeta2
 Mkgrp -name=hello
+Mkgrp -name=group1
+Mkgrp -name=group2
+Mkgrp -name=group3
 Mkuser -usuario=user1 -pwd=maincra -grp=root
-Mkuser -usuario=user2 -pwd=maincra -grp=root
-Mkuser -usuario=user3 -pwd=maincra -grp=root
+Mkuser -usuario=user2 -pwd=maincra -grp=group1
+Mkuser -usuario=user3 -pwd=maincra -grp=group1
+Mkuser -usuario=user4 -pwd=maincra -grp=group1
+Mkuser -usuario=user6 -pwd=maincra -grp=group1
+Rmusr -usuario=user3
+Rmusr -usuario=user1
+Rmusr -usuario=user2
+Rmgrp -name=hello
 Mkdir -P  -path=/home/archivos/mia/z
 Mkdir -P  -path=/home/archivos/mia/carpeta3/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
 Mkdir -P  -path=/home/archivos/mia/carpeta4/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11

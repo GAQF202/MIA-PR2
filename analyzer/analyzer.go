@@ -112,7 +112,15 @@ func AnalyzerF() []globals.Command {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
+					} else if tempWord == "rmgrp" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
 					} else if tempWord == "mkuser" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "rmusr" {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""

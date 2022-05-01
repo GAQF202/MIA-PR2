@@ -152,3 +152,8 @@ func PrintPartition(partition Partition) {
 	fmt.Println("Type: ", ByteToString(partition.Part_type[:]))
 	fmt.Println("------------------------------")
 }
+
+func NewByte() [64]byte {
+	var ver [64]byte
+	return ver
+}

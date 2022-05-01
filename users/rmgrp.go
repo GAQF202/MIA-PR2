@@ -12,21 +12,21 @@ import (
 	"github.com/PR2_MIA/read"
 )
 
-type RmusrCmd struct {
-	Usuario string
+type RmgrpCmd struct {
+	Name string
 }
 
-func (cmd *RmusrCmd) AssignParameters(command globals.Command) {
+func (cmd *RmgrpCmd) AssignParameters(command globals.Command) {
 	for _, parameter := range command.Parameters {
-		if parameter.Name == "usuario" {
-			cmd.Usuario = parameter.StringValue
+		if parameter.Name == "name" {
+			cmd.Name = parameter.StringValue
 		}
 	}
 }
 
-func (cmd *RmusrCmd) Rmusr() {
+func (cmd *RmgrpCmd) Rmgrp() {
 
-	if cmd.Usuario != "" {
+	if cmd.Name != "" {
 
 		// VALIDA QUE EXISTA UN USUARIO LOGUEADO
 		if globals.GlobalUser.Logged == -1 {
@@ -89,27 +89,27 @@ func (cmd *RmusrCmd) Rmusr() {
 			}
 		}
 
-		// STRING PARA GUARDAR EL NUEVO STRING DE GRUPOS Y USUARIOS SIN EL USUSARIO QUE SE BORRO
+		// STRING PARA GUARDAR LOS USUARIOS Y GRUPOS SIN EL GRUPO ELIMINADO
 		new_string := ""
 
-		exist_user_in := false
-		for i := 0; i < len(users); i++ {
-			// SI ES EL MISMO USUARIO ACTIVA LA BANDERA Y NO CONCATENA
-			if cmd.Usuario == users[i].User {
-				exist_user_in = true
+		exist_group_in := false
+		for i := 0; i < len(groups); i++ {
+			// SI ES EL MISMO GRUPO NO CONCATENA PERO ACTIVA BANDERA
+			if cmd.Name == groups[i].Group {
+				exist_group_in = true
 			} else {
-				new_string += users[i].Uid + "," + users[i].Type + "," + users[i].Group + "," + users[i].User + "," + users[i].Password + "\n"
+				new_string += groups[i].Gid + "," + groups[i].Type + "," + groups[i].Group + "\n"
 			}
 		}
 
-		for i := 0; i < len(groups); i++ {
-			new_string += groups[i].Gid + "," + groups[i].Type + "," + groups[i].Group + "\n"
+		for i := 0; i < len(users); i++ {
+			new_string += users[i].Uid + "," + users[i].Type + "," + users[i].Group + "," + users[i].User + "," + users[i].Password + "\n"
 
 		}
 
 		// VALIDA QUE EL GRUPO YA ESTE CREADO EN LA PARTICION
-		if !exist_user_in {
-			fmt.Println("Error: el usuario " + cmd.Usuario + " no puede eliminarse ya que no existe en la particion " + partition_m.PartitionName)
+		if !exist_group_in {
+			fmt.Println("Error: el grupo " + cmd.Name + " no puede eliminarse ya que no existe en la particion " + partition_m.PartitionName)
 		} else {
 			// QUITO DEL STRING TODOS LOS SALTOS DE LINEA A LA DERECHA
 			users_archive_content = strings.TrimRight(new_string, "\n")
