@@ -20,7 +20,7 @@ func newCommand(Name string) globals.Command {
 
 func readFile() string {
 	// LEER EL ARREGLO DE BYTES DEL ARCHIVO
-	datosComoBytes, err := ioutil.ReadFile("./test1.txt")
+	datosComoBytes, err := ioutil.ReadFile("./test.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

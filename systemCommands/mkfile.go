@@ -353,6 +353,7 @@ func (cmd *MkfileCmd) Mkfile() {
 
 		// ESCRIBO EL ARCHIVO SEGUN EL TAMANIO INDICADO
 		if cmd.Size >= 0 || content_size >= 0 {
+
 			if cmd.Size >= content_size {
 				copy(temp_inode.Size[:], []byte(strconv.Itoa(cmd.Size)))
 			} else {
@@ -390,17 +391,20 @@ func (cmd *MkfileCmd) Mkfile() {
 				temp_inode.Block[block_index] = int32(free_block_index)
 				number := 0
 				for caracter_index := 0; caracter_index < 64; caracter_index++ {
-					bloqueArchivo.Content[caracter_index] = byte(number + 48)
-					// SI ES IGUAL A 9 VUELVE A 0 Y SI NO AUMENTA
-					if number == 9 {
-						number = 0
-					} else {
-						number++
+					// SI NO LE ENVIO EL VALOR INTERNAMENTE ENTONCES NO LLENA EL BLOQUE CON NUMEROS DEL 1 AL 9
+					if cmd.AnyText == "" {
+						bloqueArchivo.Content[caracter_index] = byte(number + 48)
+						// SI ES IGUAL A 9 VUELVE A 0 Y SI NO AUMENTA
+						if number == 9 {
+							number = 0
+						} else {
+							number++
+						}
 					}
 
-					if len(content) != 0 {
-						bloqueArchivo.Content[caracter_index] = content[0]
-						if len(content) != 1 {
+					if len(content) >= 1 /*0*/ {
+						if len(content) > 1 {
+							bloqueArchivo.Content[caracter_index] = content[0]
 							// BORRO EL PRIMER CARACTER DEL CONTENIDO HASTA VACIARLA
 							content = content[1:]
 						}
