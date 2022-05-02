@@ -1,33 +1,28 @@
-package main
-
-//import (
-//"bufio"
-//"fmt"
-//"log"
-//"os"
-//)
+package execute
 
 import (
-	"bufio"
-	"os"
-
 	"github.com/PR2_MIA/analyzer"
 	"github.com/PR2_MIA/commands"
-	"github.com/PR2_MIA/execute"
+	"github.com/PR2_MIA/globals"
 	"github.com/PR2_MIA/systemCommands"
 	"github.com/PR2_MIA/users"
-	//"github.com/PR2_MIA/commands"
 )
 
-func main() {
-	// LEO ENTRADA CON ESPACIOS HASTA ENCONTRAR UN SALTO DE LINEA
-	in := bufio.NewReader(os.Stdin)
-	inputCommand, _ := in.ReadString('\n')
+type ExecCmd struct {
+	Path string
+}
 
+func (cmd *ExecCmd) AssignParameters(command globals.Command) {
+	for _, parameter := range command.Parameters {
+		if parameter.Name == "path" {
+			cmd.Path = parameter.StringValue
+		}
+	}
+}
+
+func (cmd *ExecCmd) Exec() {
 	// OBTENGO EL ARBOL DE COMANDOS
-	tree := analyzer.AnalyzerF(inputCommand, false)
-	// BORRO LOS COMANDOS INNECESARIOS
-	tree = tree[:2]
+	tree := analyzer.AnalyzerF(cmd.Path, true)
 
 	for _, element := range tree {
 		if element.Name == "mkdisk" {
@@ -90,10 +85,6 @@ func main() {
 			rmuser.Rmusr()
 		} else if element.Name == "pause" {
 			commands.Pause()
-		} else if element.Name == "exec" {
-			exec := execute.ExecCmd{}
-			exec.AssignParameters(element)
-			exec.Exec()
 		}
 	}
 }

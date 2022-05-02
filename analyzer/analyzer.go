@@ -30,10 +30,17 @@ func readFile(script_path string) string {
 	return datosComoString
 }
 
-func AnalyzerF(script_path string) []globals.Command {
+func AnalyzerF(script_path string, isFile bool) []globals.Command {
 	var tree = make([]globals.Command, 0)
-	// LEO EL ARCHIVO DE ENTRADA
-	input := strings.ToLower(readFile(script_path))
+	input := ""
+	// VERIFICO SI LA ENTRADA ES PARA EJECUTAR UN SCRIPT O DIRECTAMENTE UN COMANDO
+	if isFile {
+		// LEO EL ARCHIVO DE ENTRADA
+		input = strings.ToLower(readFile(script_path))
+	} else {
+		// ASIGNO A LA ENTRADA EL COMANDO
+		input = script_path
+	}
 	//VARIABLE PARA GUARDAR LOS COMANDOS TEMPORALES
 	tempCommand := newCommand("")
 	tempPar := newParameter("", "", -1)
@@ -121,6 +128,10 @@ func AnalyzerF(script_path string) []globals.Command {
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
 					} else if tempWord == "rmusr" {
+						tree = append(tree, tempCommand)
+						tempCommand = newCommand(tempWord)
+						tempWord = ""
+					} else if tempWord == "exec" {
 						tree = append(tree, tempCommand)
 						tempCommand = newCommand(tempWord)
 						tempWord = ""
