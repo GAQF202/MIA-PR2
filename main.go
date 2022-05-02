@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// OBTENGO EL ARBOL DE COMANDOS
-	tree := analyzer.AnalyzerF()
+	tree := analyzer.AnalyzerF("./test.txt")
 
 	for _, element := range tree {
 		if element.Name == "mkdisk" {

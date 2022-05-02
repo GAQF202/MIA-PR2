@@ -66,13 +66,14 @@ func (cmd *RmusrCmd) Rmusr() {
 			if users_inode.Block[block_i] != -1 {
 				archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(users_inode.Block[block_i])*int(unsafe.Sizeof(archive_block))))
 				// CONCATENO QUITANDO EL SALTO DE LINEA DERECHO PARA QUE NO DE ERROR
-				users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "\n")
+				users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "")
 				//actual_block_index = block_i
 			}
 		}
 
 		// ALMACENO TODOS LOS GRUPOS Y USUARIOS SEPARADOS POR UN SALTO
 		all := strings.Split(users_archive_content, "\n")
+
 		// ARREGLOS PARA GUARDAR LOS GRUPOS Y USUARIOS POR SEPARADO
 		var groups = make([]globals.Group, 0)
 		var users = make([]globals.User, 0)
@@ -96,7 +97,10 @@ func (cmd *RmusrCmd) Rmusr() {
 		for i := 0; i < len(users); i++ {
 			// SI ES EL MISMO USUARIO ACTIVA LA BANDERA Y NO CONCATENA
 			if cmd.Usuario == users[i].User {
-				exist_user_in = true
+				if users[i].Uid != "0" {
+					new_string += "\n" + "0" + "," + users[i].Type + "," + users[i].Group + "," + users[i].User + "," + users[i].Password + "\n"
+					exist_user_in = true
+				}
 			} else {
 				new_string += users[i].Uid + "," + users[i].Type + "," + users[i].Group + "," + users[i].User + "," + users[i].Password + "\n"
 			}

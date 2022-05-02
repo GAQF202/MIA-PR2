@@ -18,9 +18,9 @@ func newCommand(Name string) globals.Command {
 	return globals.Command{temp, Name}
 }
 
-func readFile() string {
+func readFile(script_path string) string {
 	// LEER EL ARREGLO DE BYTES DEL ARCHIVO
-	datosComoBytes, err := ioutil.ReadFile("./test.txt")
+	datosComoBytes, err := ioutil.ReadFile(script_path /*"./test.txt"*/)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,10 +30,10 @@ func readFile() string {
 	return datosComoString
 }
 
-func AnalyzerF() []globals.Command {
+func AnalyzerF(script_path string) []globals.Command {
 	var tree = make([]globals.Command, 0)
 	// LEO EL ARCHIVO DE ENTRADA
-	input := strings.ToLower(readFile())
+	input := strings.ToLower(readFile(script_path))
 	//VARIABLE PARA GUARDAR LOS COMANDOS TEMPORALES
 	tempCommand := newCommand("")
 	tempPar := newParameter("", "", -1)

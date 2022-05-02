@@ -95,17 +95,26 @@ func (cmd *MkuserCmd) Mkuser() {
 					}
 				}
 
+				// BANDERA PARA SABER SI SE MODIFICA EL STRING O SE CREA UN USUARIO NUEVO
+				modify := false
 				exist_user_in := false
 				for i := 0; i < len(users); i++ {
 					if cmd.Usuario == users[i].User {
-						exist_user_in = true
+						if users[i].Uid != "0" {
+							exist_user_in = true
+						} else {
+							users[i].Uid = strconv.Itoa(len(groups) + 1)
+							modify = true
+						}
 					}
 				}
 
 				exist_group_in := false
 				for i := 0; i < len(groups); i++ {
 					if cmd.Grp == groups[i].Group {
-						exist_group_in = true
+						if groups[i].Gid != "0" {
+							exist_group_in = true
+						}
 					}
 				}
 
@@ -115,14 +124,32 @@ func (cmd *MkuserCmd) Mkuser() {
 					return
 				}
 
+				// STRING PARA GUARDAR LOS USUARIOS Y GRUPOS SIN EL GRUPO ELIMINADO
+				new_string := ""
+				// CONCATENO GRUPOS
+				for i := 0; i < len(groups); i++ {
+					new_string += "\n" + groups[i].Gid + "," + groups[i].Type + "," + groups[i].Group + "\n"
+				}
+				// CONCATENO USUARIOS
+				for i := 0; i < len(users); i++ {
+					new_string += "\n" + users[i].Uid + "," + users[i].Type + "," + users[i].Group + "," + users[i].User + "," + users[i].Password + "\n"
+
+				}
+
 				// VALIDA QUE EL USUARIO AUN NO ESTE CREADO EN LA PARTICION
 				if exist_user_in {
 					fmt.Println("Error: el usuario " + cmd.Usuario + " ya existe en la particion " + partition_m.PartitionName)
 				} else {
-					// QUITO DEL STRING TODOS LOS SALTOS DE LINEA A LA DERECHA
-					users_archive_content = strings.TrimRight(users_archive_content, "\n")
-					// AGREGO EL NUEVO GRUPO AL STRING DEL CONTENIDO DE USUARIOS
-					users_archive_content += "\n" + strconv.Itoa(len(users)+1) + "," + "U," + cmd.Grp + "," + cmd.Usuario + "," + cmd.Pwd
+					if !modify {
+						// QUITO DEL STRING TODOS LOS SALTOS DE LINEA A LA DERECHA
+						users_archive_content = strings.TrimRight(users_archive_content, "\n")
+						// AGREGO EL NUEVO GRUPO AL STRING DEL CONTENIDO DE USUARIOS
+						users_archive_content += "\n" + strconv.Itoa(len(users)+1) + "," + "U," + cmd.Grp + "," + cmd.Usuario + "," + cmd.Pwd
+					} else {
+						// QUITO DEL STRING TODOS LOS SALTOS DE LINEA A LA DERECHA
+						users_archive_content = strings.TrimRight(new_string, "\n")
+					}
+
 					// LEO BITMAP DE BLOQUES
 					var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
 					bitblocks = read.ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))

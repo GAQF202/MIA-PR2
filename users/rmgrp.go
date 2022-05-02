@@ -66,18 +66,19 @@ func (cmd *RmgrpCmd) Rmgrp() {
 			if users_inode.Block[block_i] != -1 {
 				archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(users_inode.Block[block_i])*int(unsafe.Sizeof(archive_block))))
 				// CONCATENO QUITANDO EL SALTO DE LINEA DERECHO PARA QUE NO DE ERROR
-				users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "\n")
+				users_archive_content += strings.TrimRight(globals.ByteToString(archive_block.Content[:]), "")
 				//actual_block_index = block_i
 			}
 		}
 
 		// ALMACENO TODOS LOS GRUPOS Y USUARIOS SEPARADOS POR UN SALTO
 		all := strings.Split(users_archive_content, "\n")
+
 		// ARREGLOS PARA GUARDAR LOS GRUPOS Y USUARIOS POR SEPARADO
 		var groups = make([]globals.Group, 0)
 		var users = make([]globals.User, 0)
 
-		// RECORRO TODOS LOS USUAIROS Y GRUPOSY LOS SEPARO
+		// RECORRO TODOS LOS USUARIOS Y GRUPOSY LOS SEPARO
 		for i := 0; i < len(all); i++ {
 			if all[i] != "" {
 				temp := strings.Split(all[i], ",")
@@ -96,7 +97,10 @@ func (cmd *RmgrpCmd) Rmgrp() {
 		for i := 0; i < len(groups); i++ {
 			// SI ES EL MISMO GRUPO NO CONCATENA PERO ACTIVA BANDERA
 			if cmd.Name == groups[i].Group {
-				exist_group_in = true
+				if groups[i].Gid != "0" {
+					new_string += "\n" + "0" + "," + groups[i].Type + "," + groups[i].Group + "\n"
+					exist_group_in = true
+				}
 			} else {
 				new_string += groups[i].Gid + "," + groups[i].Type + "," + groups[i].Group + "\n"
 			}

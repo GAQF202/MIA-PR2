@@ -25,27 +25,12 @@ mkfs -id=571A -type=fast
 #mkfile -size=15 -path=/gerson/aja/yea.txt -r
 
 #CREACION DE CARPETAS
-#Mkdir -P  -path=/maincra
-#Mkfile -R -path=/maincra.txt -size=300
+
 login -usuario=root -password=123 -id=571A
-#mkfile -path=/b1.txt -size=75
 Mkdir -P -path=/yea
 Mkdir -P -path=/home
 Mkdir -P  -path=/home/archivos/mia/fase2
 Mkdir -P  -path=/home/archivos/mia/carpeta2
-Mkgrp -name=hello
-Mkgrp -name=group1
-Mkgrp -name=group2
-Mkgrp -name=group3
-Mkuser -usuario=user1 -pwd=maincra -grp=root
-Mkuser -usuario=user2 -pwd=maincra -grp=group1
-Mkuser -usuario=user3 -pwd=maincra -grp=group1
-Mkuser -usuario=user4 -pwd=maincra -grp=group1
-Mkuser -usuario=user6 -pwd=maincra -grp=group1
-Rmusr -usuario=user3
-Rmusr -usuario=user1
-Rmusr -usuario=user2
-Rmgrp -name=hello
 Mkdir -P  -path=/home/archivos/mia/z
 Mkdir -P  -path=/home/archivos/mia/carpeta3/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
 Mkdir -P  -path=/home/archivos/mia/carpeta4/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11/carpeta7/carpeta8/carpeta9/carpeta10/carpeta11
@@ -111,10 +96,24 @@ Mkdir  -path=/home/archivos/mia/fase2/a1
 
 mkfile -path=/home/archivos/mia/fase2/a46/hello.txt -size=80 -r -cont=/home/archivos/mia/fase2/a46/hello.txt
 
-#mkfile -path=/users.txt -r -size=100
+
+
+#CREACION DE GRUPOS
+mkgrp -naMe=Archivos
+mkgrp -NamE=Arqui
+mkgrp -name=Orga
+mkgrp -name=Compi2
+#ELIMINACION DE GRUPOS
+rmgrp -name=Arqui
+#CREACION DE USUARIOS
+Mkuser -usuario=user1 -grp=root -pwd=user1
+Mkuser -usuario=user2 -grp=Compi2 -pwd=user2
+Mkuser -usuario=user3 -grp=Compi2 -pwd=user3
+Mkuser -usuario=user4 -grp=Compi2 -pwd=user4
+Rmusr -usuario=user3
+
 
 rep -id=571A -name=disk -path=/hola/myReports/hello.svg
-
 rep -id=571A -name=tree -path=/hola/myReports/hello.svg
 
 logout
