@@ -2,13 +2,26 @@ package commands
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
+	"time"
 )
 
-func Pause() {
+// FUNCION PARA DETENER PROCESOS
+func counter() {
+	i := 0
+	for {
+		time.Sleep(time.Second * 1)
+		i++
+	}
+}
+func Pause(message string) {
+	//var v string
+	//fmt.Scanln(&v)
 
-	ch := make(chan string)
+	go counter()
+	fmt.Println(message)
+	fmt.Scanln()
+
+	/*ch := make(chan string)
 	go func(ch chan string) {
 		// disable input buffering
 		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
@@ -26,8 +39,9 @@ func Pause() {
 		// AL DETECTAR CUALQUIER ENTRADA DE TECLADO ROMPE EL CICLO
 		if stdin != "" {
 			fmt.Println("\nSaliendo del Pause...")
+			stdin = ""
 			break
 		}
 
-	}
+	}*/
 }

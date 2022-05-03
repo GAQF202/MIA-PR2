@@ -36,7 +36,7 @@ func AnalyzerF(script_path string, isFile bool) []globals.Command {
 	// VERIFICO SI LA ENTRADA ES PARA EJECUTAR UN SCRIPT O DIRECTAMENTE UN COMANDO
 	if isFile {
 		// LEO EL ARCHIVO DE ENTRADA
-		input = strings.ToLower(readFile(script_path))
+		input = strings.ToLower(readFile(script_path)) + "\n"
 	} else {
 		// ASIGNO A LA ENTRADA EL COMANDO
 		input = script_path
@@ -58,6 +58,7 @@ func AnalyzerF(script_path string, isFile bool) []globals.Command {
 
 	// BANDERA QUE INDICA QUE AUN NO ENCUENTRA UN CARACTER DISTINTO DE " " DESPUES DE "="
 	valueFound := false
+	catchSpaces := false
 
 	for i, character := range input {
 		letter := string(character)
@@ -261,13 +262,25 @@ func AnalyzerF(script_path string, isFile bool) []globals.Command {
 				} */
 			} else {
 				tempWord += letter
+				// ACTIVAR BANDER SI VIENE UNA CADENA CON COMILLAS
+				if letter == "\"" {
+					if catchSpaces {
+						catchSpaces = false
+					} else {
+						catchSpaces = true
+					}
+				}
+				// CAPUTURO ESPACIOS
+				if letter == " " && catchSpaces && valueFound {
+					tempWord += letter
+				}
 				if letter == " " && !valueFound {
 					continue
 				} else {
 					valueFound = true
 				}
 				// SI ENCUENTRA UN ESPACIO QUIERE DECIR SIGUE BUSCANDO COMANDOS
-				if (letter == " " || i == (len(input)-1) || letter == "\n") && valueFound {
+				if (letter == " " || i == (len(input)-1) || letter == "\n") && valueFound && !catchSpaces {
 					if isIntValue {
 						convertedValue, _ := strconv.Atoi(strings.TrimSpace(tempWord))
 						tempIntValue = convertedValue

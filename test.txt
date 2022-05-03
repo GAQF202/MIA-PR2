@@ -27,6 +27,7 @@ mkfs -id=571A -type=fast
 #CREACION DE CARPETAS
 
 login -usuario=root -password=123 -id=571A
+Mkdir -P -path=/maincra/momiradios
 Mkdir -P -path=/yea
 Mkdir -P -path=/home
 Mkdir -P  -path=/home/archivos/mia/fase2

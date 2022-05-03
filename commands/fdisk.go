@@ -143,10 +143,10 @@ func (cmd *FdiskCmd) Fdisk() {
 					}*/
 					// CALCULO LOS ESPACIOS VACIOS ENTRE PARTICIONES PRIMARIAS Y EXTENDIDAS
 					if totalPartitions == 4 {
-						fmt.Println("Error: la particion " + cmd.Name + " no se pude montar porque la suma de particiones extendidas y primarias llego a su límite")
+						fmt.Println("Error: la particion " + cmd.Name + " no se pude crear porque la suma de particiones extendidas y primarias llego a su límite")
 						return
 					} else if totalExtended > 0 && cmd.Type == "e" {
-						fmt.Println("Error: la particion " + cmd.Name + " no se pude montar porque solamente puede existir una particion extendida en el disco")
+						fmt.Println("Error: la particion " + cmd.Name + " no se pude crear porque solamente puede existir una particion extendida en el disco")
 						return
 					}
 

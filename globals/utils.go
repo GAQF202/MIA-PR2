@@ -143,7 +143,7 @@ func PrintEBR(ebr EBR) {
 }
 
 func PrintPartition(partition Partition) {
-	fmt.Println("---------PARTICION CREADA -----------")
+	fmt.Println("------ PARTICION CREADA ------")
 	fmt.Println("Name: ", ByteToString(partition.Part_name[:]))
 	fmt.Println("Fit: ", ByteToString(partition.Part_fit[:]))
 	fmt.Println("Size: ", ByteToString(partition.Part_size[:]))

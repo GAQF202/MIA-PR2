@@ -84,7 +84,7 @@ func (cmd *ExecCmd) Exec() {
 			rmuser.AssignParameters(element)
 			rmuser.Rmusr()
 		} else if element.Name == "pause" {
-			commands.Pause()
+			commands.Pause("Pause: Presiona cualquier letra para continuar[*]")
 		}
 	}
 }
