@@ -328,10 +328,11 @@ func (cmd *RepCmd) Rep() {
 	} else if cmd.Name == "file" {
 		// GUARDO EL NOMBRE DEL ARCHIVO
 		archive_name := cmd.Ruta[strings.LastIndex(cmd.Ruta, "/")+1 : len(cmd.Ruta)]
+		dotContent := "digraph L { node [shape=record fontname=Arial];a  [fillcolor=\"#8bff3a\",style=filled,label=\" Nombre del archivo: " + archive_name + "\\n"
 
 		//exec -path=./test.txt
 		// OBTENGO EL ULTIMO NODO DE LA RUTA
-		last_inode := read.GetInodeWithPath("/home/archivos/mia/fase2/a46/hello.txt", partition_m.Path, partition_m.Start)
+		last_inode := read.GetInodeWithPath(cmd.Ruta, partition_m.Path, partition_m.Start)
 		// VARIABLE PARA GUARDAR EL INODO DEL ARCHIVO
 		archive_inode := globals.InodeTable{}
 		// VARIABLE PARA GUARDAR EL BLOQUE TEMPORAL
@@ -360,9 +361,12 @@ func (cmd *RepCmd) Rep() {
 					}
 					// LIMPIO MI STRING DE BYTES
 					archive_content = strings.TrimRight(archive_content, "\x00")
+					archive_content += "\\n"
 				}
 			}
-			//fmt.Println(archive_content)
+			dotContent += archive_content
+			dotContent += "\"]}"
+			fmt.Println(dotContent)
 		} else {
 			fmt.Println("Error: no se puede generar el reporte del archivo " + cmd.Ruta + " debido a que no existe en el sistema de archivos")
 		}
