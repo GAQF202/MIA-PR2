@@ -366,7 +366,15 @@ func (cmd *RepCmd) Rep() {
 			}
 			dotContent += archive_content
 			dotContent += "\"]}"
-			fmt.Println(dotContent)
+			//fmt.Println(dotContent)
+
+			// CREO Y ESCRIBO EL ARCHIVO .dot
+			err := ioutil.WriteFile(report_name+"dot", []byte(dotContent), 0777)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// GRAFICO EL ARCHIVO .dot CREADO
+			globals.GraphDot(report_name+"dot", cmd.Path)
 		} else {
 			fmt.Println("Error: no se puede generar el reporte del archivo " + cmd.Ruta + " debido a que no existe en el sistema de archivos")
 		}
