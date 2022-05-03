@@ -116,5 +116,6 @@ Rmusr -usuario=user3
 
 rep -id=571A -name=disk -path=/hola/myReports/hello.svg
 rep -id=571A -name=tree -path=/hola/myReports/hello.svg
+rep -id=571A -name=file -path=/hola/myReports/hello.svg -ruta=/home/archivos/mia/fase2/a46/hello.txt
 
 logout

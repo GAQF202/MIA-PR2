@@ -3,8 +3,10 @@ package read
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"unsafe"
 
 	"github.com/PR2_MIA/globals"
@@ -128,4 +130,108 @@ func ReadEbr(file *os.File, position int) globals.EBR {
 		log.Fatal("Error ", err1)
 	}
 	return ebr
+}
+
+// FUNCION PARA BUSCAR EL ULTIMO INODO DE UNA RUTA
+func GetInodeWithPath(path string, real_path string, start int) globals.InodeTable {
+	//fmt.Println("entraaa en el file")
+	if globals.GlobalUser.Logged == -1 {
+		fmt.Println("Error: Para utilizar mkfile necesitas estar logueado")
+		return globals.InodeTable{}
+	}
+
+	// ABRO EL ARCHIVO
+	file, err := os.OpenFile(real_path, os.O_RDWR, 0777)
+	// VERIFICACION DE ERROR AL ABRIR EL ARCHIVO
+	if err != nil {
+		log.Fatal("Error ", err)
+		return globals.InodeTable{}
+	}
+
+	// OBTENGO TODAS LAS CARPETAS PADRES ANTES DEL ARCHIVO
+	parent_path := path[:strings.LastIndex(path, "/")]
+
+	//current_date := globals.GetDate()
+
+	// OBTENGO TODAS LAS CARPETAS PADRES DEL ARCHIVO
+	routes := strings.Split(parent_path, "/")
+
+	//saltar_busqueda := false
+	exist_route := false
+
+	// SI EL TAMANIO DE LAS RUTAS SEPARADAS POR / ES
+	// CERO QUIERE DECIR QUE EL ARCHIVO SE DEBE CREAR EN LA RAIZ
+	if len(routes) == 0 && path == "/" {
+		exist_route = true
+	} else {
+		temp := []string{"/"}
+		temp = append(temp, routes[1:]...)
+		routes = temp
+	}
+
+	// LEO EL SUPERBLOQUE
+	super_bloque := globals.SuperBloque{}
+	super_bloque = ReadSuperBlock(file, start)
+
+	// CREACION DE ARRAY PARA ALMACENAR LOS BITMPAS
+	var bitinodes = make([]byte, globals.ByteToInt(super_bloque.Inodes_count[:]))
+	var bitblocks = make([]byte, globals.ByteToInt(super_bloque.Blocks_count[:]))
+	bitinodes = ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_inode_start[:]), len(bitinodes))
+	bitblocks = ReadBitMap(file, globals.ByteToInt(super_bloque.Bm_block_start[:]), len(bitblocks))
+
+	// VERIFICA QUE EXISTAN LAS CARPETAS ANTES DEL ARCHIVO
+
+	temp_inode := globals.InodeTable{}
+
+	//LEO EL PRIMER INODO
+	temp_inode = ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:]))
+
+	// VECTOR PARA GUARDAR LAS RUTAS QUE FALTAN POR CREARSE
+	var remaining_routes = make([]string, len(routes))
+	// CREO UNA COPIA PARA QUE NO SE ALTERE EL ROUTE
+	copy(remaining_routes, routes)
+
+	// RECORRE LA RUTA
+	for path_index := 0; path_index < len(routes); path_index++ {
+		exist_path := false
+		// RECORRE LOS PUNTEROS DEL INODO
+		for pointerIndex := 0; pointerIndex < 16; pointerIndex++ {
+			// RECORRO SOLO LOS BLOQUES DE LOS INODOS DE TIPO CARPETA
+			if temp_inode.Block[pointerIndex] != -1 && globals.ByteToString(temp_inode.Type[:]) == "0" {
+				file_block := globals.FileBlock{}
+				file_block = ReadFileBlock(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (int(temp_inode.Block[pointerIndex]) * int(unsafe.Sizeof(file_block)))))
+				// RECORRE LOS PUNTEROS DE LOS BLOQUES
+				for blockIndex := 0; blockIndex < 4; blockIndex++ {
+					if file_block.Content[blockIndex].Inodo != -1 {
+						if globals.ByteToString(file_block.Content[blockIndex].Name[:]) == routes[path_index] {
+							// ELIMINO LAS RUTAS QUE YA ESTAN CREADAS PARA QUE QUEDEN SOLO LAS RESTANTES
+							if len(remaining_routes) == len(routes) {
+								remaining_routes = globals.RemoveIndex(remaining_routes, 0)
+								remaining_routes = globals.RemoveIndex(remaining_routes, 0)
+							} else {
+								remaining_routes = globals.RemoveIndex(remaining_routes, 0)
+							}
+							temp_inode = ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(int(file_block.Content[blockIndex].Inodo)*int(unsafe.Sizeof(temp_inode))))
+							exist_route = true
+							exist_path = true
+						}
+					}
+				}
+			}
+		}
+		if !exist_path {
+			exist_route = false
+		}
+	}
+	// VALIDACION PARA SABER SI EL ARCHIVO SE CREA EN LA RAIZ
+	if routes[0] == "/" && len(routes) == 1 {
+		temp_inode = ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:]))
+		exist_route = true
+	}
+	//VERIFICACION DE EXISTENCIA DE RUTAS
+	if !exist_route {
+		fmt.Println("No existe la ruta indicada")
+		return globals.InodeTable{}
+	}
+	return temp_inode
 }

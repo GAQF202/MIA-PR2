@@ -325,5 +325,46 @@ func (cmd *RepCmd) Rep() {
 		}
 		// GRAFICO EL ARCHIVO .dot CREADO
 		globals.GraphDot(report_name+"dot", cmd.Path)
+	} else if cmd.Name == "file" {
+		// GUARDO EL NOMBRE DEL ARCHIVO
+		archive_name := cmd.Ruta[strings.LastIndex(cmd.Ruta, "/")+1 : len(cmd.Ruta)]
+
+		//exec -path=./test.txt
+		// OBTENGO EL ULTIMO NODO DE LA RUTA
+		last_inode := read.GetInodeWithPath("/home/archivos/mia/fase2/a46/hello.txt", partition_m.Path, partition_m.Start)
+		// VARIABLE PARA GUARDAR EL INODO DEL ARCHIVO
+		archive_inode := globals.InodeTable{}
+		// VARIABLE PARA GUARDAR EL BLOQUE TEMPORAL
+		temp_block := globals.FileBlock{}
+		exist_archive := false
+		// RECORRO EL ULTIMO INODO CON SUS BLOQUE HASTA ENCONTRAR EL NOMBRE DEL ARCHIVO
+		for i := 0; i < 16; i++ {
+			if last_inode.Block[i] != -1 {
+				temp_block = read.ReadFileBlock(file, (globals.ByteToInt(super_bloque.Block_start[:]) + (int(last_inode.Block[i]) * int(unsafe.Sizeof(temp_block)))))
+				for block_i := 0; block_i < 4; block_i++ {
+					if globals.ByteToString(temp_block.Content[block_i].Name[:]) == archive_name {
+						exist_archive = true
+						archive_inode = read.ReadInode(file, globals.ByteToInt(super_bloque.Inode_start[:])+(int(temp_block.Content[block_i].Inodo)*int(unsafe.Sizeof(archive_inode))))
+					}
+				}
+			}
+		}
+		archive_content := ""
+		archive_block := globals.ArchiveBlock{}
+		if exist_archive {
+			for block_i := 0; block_i < 16; block_i++ {
+				if archive_inode.Block[block_i] != -1 {
+					archive_block = read.ReadArchiveBlock(file, globals.ByteToInt(super_bloque.Block_start[:])+(int(archive_inode.Block[block_i])*int(unsafe.Sizeof(archive_block))))
+					for con := 0; con < 64; con++ {
+						archive_content += string(archive_block.Content[con])
+					}
+					// LIMPIO MI STRING DE BYTES
+					archive_content = strings.TrimRight(archive_content, "\x00")
+				}
+			}
+			//fmt.Println(archive_content)
+		} else {
+			fmt.Println("Error: no se puede generar el reporte del archivo " + cmd.Ruta + " debido a que no existe en el sistema de archivos")
+		}
 	}
 }
