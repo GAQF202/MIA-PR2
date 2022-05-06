@@ -23,6 +23,7 @@ import (
 )
 
 func main() {
+	// Dirección máquina virtual /usr/local/go/src/github.com/PR2_MIA
 	for true {
 		CallClear()
 		fmt.Println("------------------------------")

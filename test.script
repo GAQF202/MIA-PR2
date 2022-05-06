@@ -45,6 +45,7 @@ Mkdir  -path=/home/archivos/mia/carpeta2/a7
 Mkdir  -path=/home/archivos/mia/carpeta2/a8
 Mkdir  -path=/home/archivos/mia/carpeta2/a9
 Mkdir  -path=/home/archivos/mia/carpeta2/a10
+Mkdir  -path=/home/archivos/mia/carpeta2/a10
 Mkdir  -path=/home/archivos/mia/fase2/a1
 #Mkdir  -path=/home/archivos/mia/fase2/a2
 #Mkdir  -path=/home/archivos/mia/fase2/a3
@@ -116,6 +117,6 @@ Rmusr -usuario=user3
 
 rep -id=571A -name=disk -path=/hola/myReports/hello.svg
 rep -id=571A -name=tree -path=/hola/myReports/hello.svg
-rep -id=571A -name=file -path=/hola/myReports/hello.svg -ruta=/home/archivos/mia/fase2/a46/hello.txt
+rep -id=571A -name=file -path=/hola/myReports/archive_content.svg -ruta=/home/archivos/mia/fase2/a46/hello.txt
 
 logout
